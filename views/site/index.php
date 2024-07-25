@@ -1,10 +1,11 @@
 <?php
+use yii\helpers\Html;
 
 /**
  * @var \yii\web\View $this
  */
 
-$this->title = 'Dashboard' ?? $this->params['pageTitle'] ?? 'MataSapi';
+$this->title = 'Dashboard';
 ?>
 <link rel="stylesheet" href="/assets/scss/iconly.scss"> 
 <div class="page-content"> 
@@ -22,7 +23,7 @@ $this->title = 'Dashboard' ?? $this->params['pageTitle'] ?? 'MataSapi';
                                 </div>
                                 <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
                                     <h6 class="text-muted font-semibold">Kandang Terdaftar</h6>
-                                    <h6 class="font-extrabold mb-0">2</h6>
+                                    <h6 class="font-extrabold mb-0"><?= Html::decode($cage)?></h6>
                                 </div>
 
                             </div> 
@@ -40,7 +41,7 @@ $this->title = 'Dashboard' ?? $this->params['pageTitle'] ?? 'MataSapi';
                                 </div>
                                 <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
                                     <h6 class="text-muted font-semibold">Sapi Terdaftar</h6>
-                                    <h6 class="font-extrabold mb-0">3</h6>
+                                    <h6 class="font-extrabold mb-0"><?= Html::encode("{$sapi}") ?></h6>
                                 </div>
                             </div>
                         </div>

@@ -4,12 +4,10 @@ namespace app\models;
 
 use Yii;
 use yii\base\Model;
+use app\models\User;
 
 /**
- * LoginForm is the model behind the login form.
- *
- * @property-read User|null $user
- *
+ * Login form
  */
 class LoginForm extends Model
 {
@@ -17,11 +15,11 @@ class LoginForm extends Model
     public $password;
     public $rememberMe = true;
 
-    private $_user = false;
+    private $_user;
 
 
     /**
-     * @return array the validation rules.
+     * {@inheritdoc}
      */
     public function rules()
     {
@@ -48,21 +46,27 @@ class LoginForm extends Model
             $user = $this->getUser();
 
             if (!$user || !$user->validatePassword($this->password)) {
-                $this->addError($attribute, 'Incorrect username or password.');
+                $this->addError($attribute, 'Username atau password salah. Silakan coba lagi.');
             }
         }
     }
 
     /**
      * Logs in a user using the provided username and password.
-     * @return bool whether the user is logged in successfully
+     *
+     * @return string|null the JWT token if the user is logged in successfully, otherwise null
      */
     public function login()
     {
-        if ($this->validate()) {
-            return Yii::$app->user->login($this->getUser(), $this->rememberMe ? 3600*24*30 : 0);
+        if ($this->validate() && $this->getUser()) {
+            // Perbarui auth_key jika login berhasil
+            $this->_user->generateJwt();
+            $this->_user->save(false);
+
+            // Mengembalikan auth_key sebagai token otentikasi
+            return $this->_user->auth_key;
         }
-        return false;
+        return null;
     }
 
     /**
@@ -70,12 +74,35 @@ class LoginForm extends Model
      *
      * @return User|null
      */
-    public function getUser()
+    protected function getUser()
     {
-        if ($this->_user === false) {
+        if ($this->_user === null) {
             $this->_user = User::findByUsername($this->username);
         }
 
         return $this->_user;
     }
 }
+
+// public function login()
+//     {
+//         if ($this->validate()) {
+//             $user = $this->getUser();
+//             if ($user) {
+//                 // Generate JWT token
+//                 $jwtToken = $user->generateJwt();
+
+//                 // Use Yii2's cache to store the JWT token
+//                 // The key is prefixed with 'jwt_' for clarity, adjust as needed
+//                 $cacheKey = 'jwt_' . $user->id;
+//                 $expiration = 3600; // Token expiration time in seconds, adjust as needed
+
+//                 // Save JWT token to cache
+//                 Yii::$app->cache->set($cacheKey, $jwtToken, $expiration);
+
+//                 // Return the JWT token
+//                 return $jwtToken;
+//             }
+//         }
+//         return null;
+//     }

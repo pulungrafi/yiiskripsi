@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\Cage;
 use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
@@ -9,6 +10,7 @@ use yii\web\Response;
 use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\models\ContactForm;
+use app\models\Livestock;
 
 class SiteController extends Controller
 {
@@ -61,7 +63,13 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index');
+        $livestock = Livestock::find()->all();
+        $cage = Cage::find()->all();
+
+        return $this->render('index', [
+            'sapi' => count($livestock),
+            'cage' => count($cage),
+        ]);
     }
 
     /**
@@ -138,7 +146,7 @@ class SiteController extends Controller
         return $this->render('create-kandang');
     }
     
-    public function actionSignup(){
-        return $this->render('signup');
+    public function actionRegister(){
+        return $this->render('register');
     }
 }

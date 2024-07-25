@@ -2,7 +2,7 @@
 
 return [
     'class' => 'yii\db\Connection',
-    'dsn' => 'mysql:host=https://digiternak.timbangkit.cloud/;dbname=yii2basic',
+    'dsn' => 'mysql:host=localhost;dbname=digiternak',
     'username' => 'root',
     'password' => '',
     'charset' => 'utf8',

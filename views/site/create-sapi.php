@@ -3,7 +3,7 @@
  * @var \yii\web\View $this
  */
 
-$this->title = 'Daftar Sapi' ?? $this->params['pageTitle'] ?? 'MataSapi';
+$this->title = 'Daftar Sapi';
 ?>
 <div class="page-content"> 
     <section class="row">
@@ -18,6 +18,7 @@ $this->title = 'Daftar Sapi' ?? $this->params['pageTitle'] ?? 'MataSapi';
                                     <div class="col">
                                         <div class="form-group">
                                             <label for="feedback1" class="sr-only">Nama Sapi</label>
+                                            <?= $form->field($model, 'username')->textInput()->hint('Please enter your name')->label('Name') ?>
                                             <input type="text" id="feedback1" class="form-control" placeholder=""
                                                 name="name">
                                         </div>

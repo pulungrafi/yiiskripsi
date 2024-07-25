@@ -25,6 +25,7 @@ $themeMazer = MainAsset::register($this);
 
             <form action="index.html">
                 <div class="form-group position-relative has-icon-left mb-4">
+                <?= $form->field($model, 'username')->textInput()->hint('Please enter your name')->label('Name') ?>
                     <input type="text" class="form-control form-control-xl" placeholder="Username">
                     <div class="form-control-icon">
                         <i class="bi bi-person"></i>

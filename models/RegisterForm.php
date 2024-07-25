@@ -4,80 +4,57 @@ namespace app\models;
 
 use Yii;
 use yii\base\Model;
+use app\models\User;
 
-/**
- * LoginForm is the model behind the login form.
- *
- * @property-read User|null $user
- *
- */
 class RegisterForm extends Model
 {
     public $username;
     public $email;
     public $password;
-    public $password_repeat;
-    public $role_id;
+    public $verification_token;
 
-
-    /**
-     * @return array the validation rules.
-     */
     public function rules()
     {
         return [
-            // username and password are both required
-            [['username', 'password', 'email'], 'required'],
-            // email has to be a valid email address
+            [['username', 'email', 'password'], 'required', 'message' => 'Atribut tidak boleh kosong.'],
+            [['username', 'email'], 'string', 'max' => 255],
             ['email', 'email'],
-            // rememberMe must be a boolean value
-            ['rememberMe', 'boolean'],
-            // password is validated by validatePassword()
-            ['password', 'validatePassword'],
+            ['email', 'unique', 'targetClass' => User::class, 'message' => 'Email sudah digunakan oleh pengguna lain.'],
+            ['username', 'unique', 'targetClass' => User::class, 'message' => 'Username sudah digunakan oleh pengguna lain.'],
+            ['password', 'string', 'min' => 8, 'message' => 'Password minimal terdiri dari 8 karakter.'],
+            ['password', 'validatePasswordComplexity'],
         ];
     }
 
-    /**
-     * Validates the password.
-     * This method serves as the inline validation for password.
-     *
-     * @param string $attribute the attribute currently being validated
-     * @param array $params the additional name-value pairs given in the rule
-     */
-    public function validatePassword($attribute, $params)
+    public function attributeLabels()
     {
-        if (!$this->hasErrors()) {
-            $user = $this->getUser();
+        return [
+            'username' => 'Username',
+            'email' => 'Email',
+            'password' => 'Password',
+        ];
+    }
 
-            if (!$user || !$user->validatePassword($this->password)) {
-                $this->addError($attribute, 'Incorrect username or password.');
-            }
+    public function validatePasswordComplexity($attribute, $params)
+    {
+        if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/', $this->$attribute)) {
+            $this->addError($attribute, 'Password harus mengandung setidaknya satu huruf besar, satu huruf kecil, dan satu angka.');
         }
     }
 
-    /**
-     * Logs in a user using the provided username and password.
-     * @return bool whether the user is logged in successfully
-     */
-    public function login()
+    public function register()
     {
-        if ($this->validate()) {
-            return Yii::$app->user->login($this->getUser(), $this->rememberMe ? 3600*24*30 : 0);
-        }
-        return false;
-    }
-
-    /**
-     * Finds user by [[username]]
-     *
-     * @return User|null
-     */
-    public function getUser()
-    {
-        if ($this->_user === false) {
-            $this->_user = User::findByUsername($this->username);
+        if (!$this->validate()) {
+            return null;
         }
 
-        return $this->_user;
+        $user = new User();
+        $user->username = $this->username;
+        $user->email = $this->email;
+        $user->setPassword($this->password);
+        $user->status = User::STATUS_ACTIVE;
+        $user->verification_token = $this->verification_token;
+
+        return $user->save() ? $user : null;
     }
 }
