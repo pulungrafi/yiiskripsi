@@ -1,9 +1,13 @@
 <?php
 use yii\helpers\Html;
+use yii\helpers\HtmlPurifier;
 
 /**
  * @var \yii\web\View $this
  */
+/* @var $cages app\models\Cage[] */
+/* @var $cages app\models\Livestock[] */
+
 
 $this->title = 'Dashboard';
 ?>
@@ -57,32 +61,29 @@ $this->title = 'Dashboard';
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-borderless mb-0">
-                                    <thead>
-                                        <tr>
-                                            <th>Nama Kandang</th>
-                                            <th>Lokasi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td class="text-bold-500">Kandang ijo</td>
-                                            <td>Dramaga Cantik Residence</td>
-                                            <!-- <td><div class="comment-actions">
-                                                <button class="btn icon icon-left btn-primary me-2 text-nowrap" data-bs-toggle="modal" data-bs-target="#border-less"><i class="bi bi-eye-fill"></i> Show</button>
-                                                <button class="btn icon icon-left btn-warning me-2 text-nowrap"><i class="bi bi-pencil-square"></i> Edit</button>
-                                                <button class="btn icon icon-left btn-danger me-2 text-nowrap"><i class="bi bi-x-circle"></i> Remove</button>
-                                            </div></td> -->
-                                        </tr>
-                                        <tr>
-                                            <td class="text-bold-500">Kandang ijo</td>
-                                            <td>Dramaga Cantik Residence</td>
-                                            <!-- <td><div class="comment-actions">
-                                                <button class="btn icon icon-left btn-primary me-2 text-nowrap"><i class="bi bi-eye-fill"></i> Show</button>
-                                                <button class="btn icon icon-left btn-warning me-2 text-nowrap"><i class="bi bi-pencil-square"></i> Edit</button>
-                                                <button class="btn icon icon-left btn-danger me-2 text-nowrap"><i class="bi bi-x-circle"></i> Remove</button>
-                                            </div></td> -->
-                                        </tr>
-                                    </tbody>
+                                    <?php if (!empty($cages)): ?>
+                                        <thead>
+                                            <tr>
+                                                <th>Nama Kandang</th>
+                                                <th>Lokasi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php foreach ($cages as $cage): ?>
+                                            <tr>
+                                                <td class="text-bold-500 post"><?= $cage->name ?></td>
+                                                <td><?= $cage->location ?></td>
+                                                <!-- <td><div class="comment-actions">
+                                                    <button class="btn icon icon-left btn-primary me-2 text-nowrap" data-bs-toggle="modal" data-bs-target="#border-less"><i class="bi bi-eye-fill"></i> Show</button>
+                                                    <button class="btn icon icon-left btn-warning me-2 text-nowrap"><i class="bi bi-pencil-square"></i> Edit</button>
+                                                    <button class="btn icon icon-left btn-danger me-2 text-nowrap"><i class="bi bi-x-circle"></i> Remove</button>
+                                                </div></td> -->
+                                            </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    <?php else: ?>
+                                        <p>Anda belum memiliki kandang.</p>
+                                    <?php endif; ?>
                                 </table>
                             </div>
                         </div>
@@ -96,39 +97,33 @@ $this->title = 'Dashboard';
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-borderless mb-0">
-                                    <thead>
-                                        <tr>
-                                            <th>Kode Sapi</th>
-                                            <th>VID</th>
-                                            <th>Umur</th>
-                                            <th>Kesehatan</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td class="text-bold-500">Sapi ijo</td>
-                                            <td>2938</td>
-                                            <td>2 Tahun</td>
-                                            <td>Sehat</td>
-                                            <!-- <td><div class="comment-actions">
-                                                <button class="btn icon icon-left btn-primary me-2 text-nowrap"><i class="bi bi-eye-fill"></i> Show</button>
-                                                <button class="btn icon icon-left btn-warning me-2 text-nowrap"><i class="bi bi-pencil-square"></i> Edit</button>
-                                                <button class="btn icon icon-left btn-danger me-2 text-nowrap"><i class="bi bi-x-circle"></i> Remove</button>
-                                            </div></td> -->
-                                        </tr>
-                                        <tr>
-                                            <td class="text-bold-500">Sapi ijo</td>
-                                            <td>2938</td>
-                                            <td>2 Tahun</td>
-                                            <td>Sehat</td>
-                                            <!-- <td><div class="comment-actions">
-                                                <button class="btn icon icon-left btn-primary me-2 text-nowrap"><i class="bi bi-eye-fill"></i> Show</button>
-                                                <button class="btn icon icon-left btn-warning me-2 text-nowrap"><i class="bi bi-pencil-square"></i> Edit</button>
-                                                <button class="btn icon icon-left btn-danger me-2 text-nowrap"><i class="bi bi-x-circle"></i> Remove</button>
-                                            </div>
-                                            </td> -->
-                                        </tr>
-                                    </tbody>
+                                <?php if (!empty($livestocks)): ?>
+                                        <thead>
+                                            <tr>
+                                                <th>Kode Sapi</th>
+                                                <th>VID</th>
+                                                <th>Umur</th>
+                                                <th>Kesehatan</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php foreach ($livestocks as $livestock): ?>
+                                            <tr>
+                                                <td class="text-bold-500 post"><?= $livestock->name ?></td>
+                                                <td><?= $livestock->vid ?></td>
+                                                <td><?= $livestock->age ?></td>
+                                                <td><?= $livestock->health ?></td>
+                                                <!-- <td><div class="comment-actions">
+                                                    <button class="btn icon icon-left btn-primary me-2 text-nowrap"><i class="bi bi-eye-fill"></i> Show</button>
+                                                    <button class="btn icon icon-left btn-warning me-2 text-nowrap"><i class="bi bi-pencil-square"></i> Edit</button>
+                                                    <button class="btn icon icon-left btn-danger me-2 text-nowrap"><i class="bi bi-x-circle"></i> Remove</button>
+                                                </div></td> -->
+                                            </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    <?php else: ?>
+                                        <p>Anda belum memiliki sapi.</p>
+                                    <?php endif; ?>
                                 </table>
                             </div>
                         </div>

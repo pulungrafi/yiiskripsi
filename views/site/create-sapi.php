@@ -18,7 +18,6 @@ $this->title = 'Daftar Sapi';
                                     <div class="col">
                                         <div class="form-group">
                                             <label for="feedback1" class="sr-only">Nama Sapi</label>
-                                            <?= $form->field($model, 'username')->textInput()->hint('Please enter your name')->label('Name') ?>
                                             <input type="text" id="feedback1" class="form-control" placeholder=""
                                                 name="name">
                                         </div>

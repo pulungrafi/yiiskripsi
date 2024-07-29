@@ -2,15 +2,16 @@
 
 namespace app\controllers;
 
-use app\models\Cage;
 use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\Response;
 use yii\filters\VerbFilter;
+use app\models\Cage;
 use app\models\LoginForm;
 use app\models\ContactForm;
 use app\models\Livestock;
+
 
 class SiteController extends Controller
 {
@@ -63,7 +64,8 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        $livestock = Livestock::find()->all();
+        $user_id = 8;
+        $livestock = Livestock::find($user_id)->all();
         $cage = Cage::find()->all();
 
         return $this->render('index', [
@@ -143,7 +145,29 @@ class SiteController extends Controller
     }
     
     public function actionCreateKandang(){
-        return $this->render('create-kandang');
+        $cage = new Cage();
+        $cage->user_id = 2;
+        //$cage->user_id = Yii::$app->user->id;
+        if ($cage->load(Yii::$app->request->post()) && $cage->save()) {
+            Yii::$app->response->statusCode = 201;
+            return $this -> redirect('create-kandang',[
+                'message' => 'Kandang berhasil dibuat',
+                'error' => false,
+                'data' => $cage,
+            ]);
+            
+        }
+        // else {
+        //     Yii::$app->response->statusCode = 400;
+        //     return [
+        //         'message' => 'Gagal membuat kandang', 
+        //         'error' => true, 
+        //         'details' => $this->getValidationErrors($cage),
+        //     ];}
+        return $this->render('create-kandang', [
+            'cage' => $cage,
+        ]);
+
     }
     
     public function actionRegister(){

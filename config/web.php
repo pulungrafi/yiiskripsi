@@ -67,16 +67,19 @@ $config = [
             ],
         ],
         'db' => $db,
-        /*
+        
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
             ],
         ],
-        */
+        
     ],
-    'params' => $params,
+    'params' => [
+        $params,
+        'user_id' => 8,
+        ]
 ];
 
 if (YII_ENV_DEV) {

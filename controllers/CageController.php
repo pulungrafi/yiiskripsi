@@ -3,12 +3,13 @@
 namespace app\controllers;
 
 use Yii;
+use yii\web\Controller;
 use yii\filters\auth\HttpBearerAuth;
 use app\models\Cage;
 use app\models\User;
 use yii\filters\VerbFilter;
 
-class CageController extends BaseController
+class CageController extends SiteController
 {
     public $modelClass = 'app\models\Cage';
 
@@ -147,12 +148,13 @@ class CageController extends BaseController
 
         $cage->load(Yii::$app->request->getBodyParams(), '');
         $cage->user_id = Yii::$app->user->id;
-        if ($cage->save()) {
+        if ($cage->load(Yii::$app->request->post()) && $cage->save()) {
             Yii::$app->response->statusCode = 201;
             return [
                 'message' => 'Kandang berhasil dibuat',
                 'error' => false,
                 'data' => $cage,
+                $this -> redirect(['view', 'id' => $cage->id]),
             ];
         } else {
             Yii::$app->response->statusCode = 400;
@@ -162,6 +164,9 @@ class CageController extends BaseController
                 'details' => $this->getValidationErrors($cage),
             ];
         }
+        return $this->render('create-kandang', [
+            'cage' => $cage,
+        ]);
     }
 
     /**

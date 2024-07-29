@@ -92,7 +92,8 @@ class Cage extends ActiveRecord
             return;
         }
 
-        $userId = Yii::$app->user->identity->id;
+        //$userId = Yii::$app->user->identity->id;
+        $userId = 8;
         $existingCage = Cage::find()
             ->where(['name' => $this->$attribute, 'user_id' => $userId])
             ->one();
@@ -108,7 +109,8 @@ class Cage extends ActiveRecord
 
         if ($insert) {
             // Get user_id from the currently logged in user
-            $userId = Yii::$app->user->identity->id;
+            //$userId = Yii::$app->user->identity->id;
+            $userId = 8;
 
             // Save user_id
             $this->updateAttributes(['user_id' => $userId]);
