@@ -1,6 +1,11 @@
 <?php
+use yii\helpers\Html;
+use yii\widgets\ActiveForm;
 /**
  * @var \yii\web\View $this
+ * @var yii\widgets\ActiveForm $form
+ * @var app\models\Livestock $livestock
+ * @var app\models\LivestockImage $image
  */
 
 $this->title = 'Daftar Sapi';
@@ -13,7 +18,19 @@ $this->title = 'Daftar Sapi';
                     <div class="card-content">
                         <div class="card-body">
                             <h4 class="card-title mb-4">Buat Sapi Baru</h4>
-                            <form class="form" method="post">
+                            <form class="livestock-form" method="post">
+                                <?php $form = ActiveForm::begin(); ?>
+                                    <div class="form-body">
+                                        <?= $form->field($livestock, 'name')->textInput(['maxlength' => true]) ?>
+                                        // <?= $form->field($cage, 'location')->textInput(['maxlength' => true]) ?>
+                                        // <?= $form->field($cage, 'description')->textarea(['rows' => 6]) ?>
+                                    </div>
+                                    <div class="form-actions d-flex justify-content-end mt-3">
+                                                <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+
+                                        <!-- <button type="submit" class="btn btn-primary me-1">Submit</button> -->
+                                    </div>
+                                <?php ActiveForm::end(); ?>
                                 <div class="form-body row">
                                     <div class="col">
                                         <div class="form-group">

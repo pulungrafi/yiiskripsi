@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use Yii;
 use yii\filters\AccessControl;
+use app\controllers\BaseController;
 use yii\web\Controller;
 use yii\web\Response;
 use yii\filters\VerbFilter;
@@ -13,7 +14,7 @@ use app\models\ContactForm;
 use app\models\Livestock;
 
 
-class SiteController extends Controller
+class SiteController extends BaseController
 {
     /**
      * {@inheritdoc}
@@ -64,8 +65,7 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        $user_id = 8;
-        $livestock = Livestock::find($user_id)->all();
+        $livestock = Livestock::find()->all();
         $cage = Cage::find()->all();
 
         return $this->render('index', [
@@ -150,7 +150,7 @@ class SiteController extends Controller
         //$cage->user_id = Yii::$app->user->id;
         if ($cage->load(Yii::$app->request->post()) && $cage->save()) {
             Yii::$app->response->statusCode = 201;
-            return $this -> redirect('create-kandang',[
+            return $this -> render('create-kandang',[
                 'message' => 'Kandang berhasil dibuat',
                 'error' => false,
                 'data' => $cage,

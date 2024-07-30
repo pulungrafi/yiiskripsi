@@ -7,9 +7,10 @@ use yii\web\Controller;
 use yii\filters\auth\HttpBearerAuth;
 use app\models\Cage;
 use app\models\User;
+use app\controllers\BaseController;
 use yii\filters\VerbFilter;
 
-class CageController extends SiteController
+class CageController extends BaseController
 {
     public $modelClass = 'app\models\Cage';
 
