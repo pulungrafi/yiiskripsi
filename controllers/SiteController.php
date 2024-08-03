@@ -3,18 +3,29 @@
 namespace app\controllers;
 
 use Yii;
+use yii\db\ActiveRecord;
 use yii\filters\AccessControl;
 use app\controllers\BaseController;
 use yii\web\Controller;
 use yii\web\Response;
 use yii\filters\VerbFilter;
+use app\models\BcsImage;
+use app\models\BodyCountScore;
 use app\models\Cage;
-use app\models\LoginForm;
 use app\models\ContactForm;
+use app\models\EditProfileForm;
 use app\models\Livestock;
+use app\models\LivestockImage;
+use app\models\LoginForm;
+use app\models\Note;
+use app\models\NoteImage;
+use app\models\RegisterForm;
+use app\models\RequestPasswordResetForm;
+use app\models\User;
 
 
-class SiteController extends BaseController
+
+class SiteController extends Controller
 {
     /**
      * {@inheritdoc}
@@ -141,7 +152,50 @@ class SiteController extends BaseController
     }
     
     public function actionCreateSapi(){
-        return $this->render('create-sapi');
+        $model = new Livestock();
+        $requestData = Yii::$app->getRequest()->getBodyParams();
+        $model->load($requestData, '');
+
+        // Validasi cage_id berdasarkan user_id
+        $cageId = $model->cage_id;
+        $userId = 8;
+        // $userId = Yii::$app->user->identity->id;
+
+        if ($cageId === null) {
+            Yii::$app->getResponse()->setStatusCode(400); // Bad Request
+            return $this -> render('error',[
+                'message' => 'Kandang tidak boleh kosong, mohon buat kandang terlebih dahulu.',
+                'error' => true,
+            ]);
+        }
+    
+        $existingCage = Cage::find()
+            ->where(['id' => $cageId, 'user_id' => $userId])
+            ->exists();
+    
+        if (!$existingCage) {
+            Yii::$app->getResponse()->setStatusCode(400); // Bad Request
+            return [
+                'message' => 'Kandang tidak ditemukan, mohon buat kandang sebelum menambahkan ternak.',
+                'error' => true,
+            ];
+        }
+
+        if ($model->save()) {
+            Yii::$app->getResponse()->setStatusCode(201);
+            return $this-> render('create-sapi',[
+                'message' => 'Data ternak berhasil dibuat.',
+                'error' => false,
+                'data' => $model,
+            ]);
+        } else {
+            Yii::$app->getResponse()->setStatusCode(400);
+            return [
+                'message' => 'Gagal membuat data ternak.',
+                'error' => true,
+                'details' => $this->getValidationErrors($model),
+            ];
+        }
     }
     
     public function actionCreateKandang(){
@@ -172,5 +226,9 @@ class SiteController extends BaseController
     
     public function actionRegister(){
         return $this->render('register');
+    }
+    
+    public function actionBcs(){
+        return $this->render('bcs');
     }
 }

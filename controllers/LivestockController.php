@@ -6,19 +6,21 @@ use Yii;
 use yii\filters\auth\HttpBearerAuth;
 use yii\web\NotFoundHttpException;
 use yii\web\ServerErrorHttpException;
+use yii\web\Controller;
+use yii\web\Response;
 use app\models\Livestock;
 use app\models\LivestockImage;
 use app\models\Cage;
 use app\models\Note;
 use app\models\NoteImage;
-use app\controllers\BaseController;
+use app\controllers\SiteController;
 use yii\filters\VerbFilter;
 use yii\web\UploadedFile;
 use yii\helpers\FileHelper;
 use Google\Cloud\Storage\StorageClient;
 use Google\Cloud\Storage\Acl;
 
-class LivestockController extends BaseController
+class LivestockController extends Controller
 {
     public $modelClass = 'app\models\Livestock';
 
@@ -50,7 +52,7 @@ class LivestockController extends BaseController
 
         // VerbFilter untuk memastikan setiap action hanya menerima HTTP method yang sesuai
         $behaviors['verbs'] = [
-            'class' => \yii\filters\VerbFilter::class,
+            'class' => VerbFilter::class,
             'actions' => [
                 'create' => ['POST'],
                 'update' => ['PUT', 'PATCH'],
@@ -170,17 +172,17 @@ class LivestockController extends BaseController
 
         if ($livestock) {
             Yii::$app->response->statusCode = 200;
-            return [
+            return $this-> render ('create-sapi', [
                 'message' => 'Data ternak berhasil ditemukan.',
                 'error' => false,
                 'data' => $livestock,
-            ];
+            ]);
         } else {
             Yii::$app->response->statusCode = 404;
-            return [
+            return $this->render('create-sapi',[
                 'message' => "Ternak tidak ditemukan",
                 'error' => true,
-            ];
+            ]);
         }
     }
 

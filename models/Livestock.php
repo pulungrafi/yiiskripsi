@@ -141,6 +141,53 @@ class Livestock extends ActiveRecord
         return $fields;
     }
 
+    public function actionCreate()
+    {
+        $model = new Livestock();
+        $requestData = Yii::$app->getRequest()->getBodyParams();
+        $model->load($requestData, '');
+
+        // Validasi cage_id berdasarkan user_id
+        $cageId = $model->cage_id;
+        $userId = Yii::$app->user->identity->id;
+
+        if ($cageId === null) {
+            Yii::$app->getResponse()->setStatusCode(400); // Bad Request
+            return [
+                'message' => 'Kandang tidak boleh kosong, mohon buat kandang terlebih dahulu.',
+                'error' => true,
+            ];
+        }
+    
+        $existingCage = Cage::find()
+            ->where(['id' => $cageId, 'user_id' => $userId])
+            ->exists();
+    
+        if (!$existingCage) {
+            Yii::$app->getResponse()->setStatusCode(400); // Bad Request
+            return [
+                'message' => 'Kandang tidak ditemukan, mohon buat kandang sebelum menambahkan ternak.',
+                'error' => true,
+            ];
+        }
+
+        if ($model->save()) {
+            Yii::$app->getResponse()->setStatusCode(201);
+            return [
+                'message' => 'Data ternak berhasil dibuat.',
+                'error' => false,
+                'data' => $model,
+            ];
+        } else {
+            Yii::$app->getResponse()->setStatusCode(400);
+            return [
+                'message' => 'Gagal membuat data ternak.',
+                'error' => true,
+                'details' => $this->getValidationErrors($model),
+            ];
+        }
+    }
+
     public function validateBirthdate($attribute, $params)
     {
         $today = new \DateTime();

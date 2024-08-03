@@ -88,6 +88,9 @@ JS) ?>
 						<li class="submenu-item">
 							<a href="<?= Url::toRoute(['/site/create-sapi']) ?>">Daftar Sapi</a>
 						</li>
+						<li class="submenu-item">
+							<a href="<?= Url::toRoute(['/site/bcs']) ?>">Daftar BCS</a>
+						</li>
 
 						<!-- <li class="submenu-item">
 							<a href="<?= Url::current(['layout' => 'auth', 'render' => '/auth/login']) ?>">LogIn</a>
