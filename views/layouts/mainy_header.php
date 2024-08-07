@@ -104,10 +104,12 @@ $themeMazer = MainAsset::register($this);
 							<hr class="dropdown-divider">
 						</li>
 						<li>
-							<a class="dropdown-item" href="<?= Url::toRoute(['/site/login']) ?>">
+						<form action="<?= Url::toRoute(['/user/index']) ?>" method="" style="display: inline;">
+							<button type="submit" class="dropdown-item">
 								<i class="icon-mid bi bi-box-arrow-left me-2"></i>
 								Logout
-							</a>
+							</button>
+						</form>
 						</li>
 					</ul>
 				</div>

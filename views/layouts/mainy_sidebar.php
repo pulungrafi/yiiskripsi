@@ -83,7 +83,7 @@ JS) ?>
 					</a>
 					<ul class="submenu">
 						<li class="submenu-item">
-							<a href="<?= Url::toRoute(['/site/create-kandang']) ?>">Daftar Kandang</a>
+							<a href="<?= Url::toRoute(['/cage/index']) ?>">Daftar Kandang</a>
 						</li>
 						<li class="submenu-item">
 							<a href="<?= Url::toRoute(['/site/create-sapi']) ?>">Daftar Sapi</a>

@@ -8,16 +8,18 @@ use yii\filters\auth\HttpBearerAuth;
 use app\models\Cage;
 use app\models\User;
 use app\controllers\BaseController;
+use app\controllers\SiteController;
 use yii\filters\VerbFilter;
 
-class CageController extends BaseController
+class CageController extends SiteController
 {
     public $modelClass = 'app\models\Cage';
 
     /**
      * @inheritdoc
      */
-    public function actions()
+    
+     public function actions()
     {
         $actions = parent::actions();
 
@@ -51,6 +53,7 @@ class CageController extends BaseController
                 'get-cages' => ['GET'],
             ],
         ];
+        
 
         return $behaviors;
     }
@@ -78,7 +81,9 @@ class CageController extends BaseController
     public function actionIndex()
     {
         $cages = Cage::find()->all();
-        return $cages;
+        return $this-> render('index',[
+            'cages' => $cages,
+        ]);
     }
 
     /**

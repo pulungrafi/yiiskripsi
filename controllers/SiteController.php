@@ -32,8 +32,9 @@ class SiteController extends Controller
      */
     public function behaviors()
     {
-        return [
-            'access' => [
+        $behaviors = parent::behaviors();
+        
+        $behaviors['access'] = [
                 'class' => AccessControl::className(),
                 'only' => ['logout'],
                 'rules' => [
@@ -43,14 +44,45 @@ class SiteController extends Controller
                         'roles' => ['@'],
                     ],
                 ],
-            ],
-            'verbs' => [
-                'class' => VerbFilter::className(),
-                'actions' => [
-                    'logout' => ['post'],
-                ],
-            ],
+            ];
+        $behaviors['verbs'] = [
+            'class' => VerbFilter::className(),
+            'actions' => [
+                'logout' => ['post'],
+             ],
         ];
+            return $behaviors;
+    }
+    public function getValidationErrors($model)
+    {
+        $errorDetails = [];
+        foreach ($model->errors as $errors) {
+            foreach ($errors as $error) {
+                $errorDetails[] = $error;
+            }
+        }
+        return $errorDetails;
+    }
+    protected $noAuthActions = [];
+
+    public function beforeAction($action)
+    {
+        if (!parent::beforeAction($action)) {
+            return false;
+        }
+
+        // Skip token verification for specified actions
+        if (in_array($action->id, $this->noAuthActions)) {
+            return true; 
+        }
+
+        $token = Yii::$app->request->getHeaders()->get('Authorization');
+        if ($token !== null && !User::verifyJwt($token)) {
+            throw new \yii\web\UnauthorizedHttpException('Your token is invalid or expired.');
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -198,37 +230,88 @@ class SiteController extends Controller
         }
     }
     
-    public function actionCreateKandang(){
-        $cage = new Cage();
-        $cage->user_id = 2;
-        //$cage->user_id = Yii::$app->user->id;
-        if ($cage->load(Yii::$app->request->post()) && $cage->save()) {
-            Yii::$app->response->statusCode = 201;
-            return $this -> render('create-kandang',[
-                'message' => 'Kandang berhasil dibuat',
-                'error' => false,
-                'data' => $cage,
-            ]);
+    // public function actionCreateKandang(){
+    //     $cage = new Cage();
+    //     $cage->user_id = 2;
+    //     //$cage->user_id = Yii::$app->user->id;
+    //     if ($cage->load(Yii::$app->request->post()) && $cage->save()) {
+    //         Yii::$app->response->statusCode = 201;
+    //         return $this -> render('create-kandang',[
+    //             'message' => 'Kandang berhasil dibuat',
+    //             'error' => false,
+    //             'data' => $cage,
+    //         ]);
             
-        }
-        // else {
-        //     Yii::$app->response->statusCode = 400;
-        //     return [
-        //         'message' => 'Gagal membuat kandang', 
-        //         'error' => true, 
-        //         'details' => $this->getValidationErrors($cage),
-        //     ];}
-        return $this->render('create-kandang', [
-            'cage' => $cage,
-        ]);
+    //     }
+    //     // else {
+    //     //     Yii::$app->response->statusCode = 400;
+    //     //     return [
+    //     //         'message' => 'Gagal membuat kandang', 
+    //     //         'error' => true, 
+    //     //         'details' => $this->getValidationErrors($cage),
+    //     //     ];}
+    //     return $this->render('create-kandang', [
+    //         'cage' => $cage,
+    //     ]);
 
-    }
+    // }
     
     public function actionRegister(){
         return $this->render('register');
     }
     
     public function actionBcs(){
-        return $this->render('bcs');
-    }
+        // $model = new BodyCountScore();
+        // $model->livestock_id = $livestock_id;
+    
+        // if ($model->load(Yii::$app->request->post(), '') && $model->validate()) {
+        //     // Update the Livestock model
+        //     $livestock = Livestock::findOne($model->livestock_id);
+        //     if ($livestock) {
+        //         $model->save();
+        //         $livestock->body_weight = $model->body_weight;
+        //         $livestock->chest_size = $model->chest_size;
+        //         $livestock->save(false);
+    
+        //         Yii::$app->response->setStatusCode(201);
+        //         return $this -> render('bcs', [
+        //             'message' => 'BCS berhasil dibuat.',
+        //             'error' => false,
+        //             'data' => $model,
+        //         ]);
+        //     } else {
+        //         Yii::$app->response->setStatusCode(400);
+        //         return [
+        //             'message' => 'Gagal membuat pembaruan BCS. Ternak tidak ditemukan',
+        //             'error' => true,
+        //         ];
+        //     }
+        // } else {
+        //     Yii::$app->response->setStatusCode(400);
+        //     return [
+        //         'message' => 'Gagal membuat BCS. Data tidak valid.',
+        //         'error' => true,
+        //         'details' => $this->getValidationErrors($model),
+        //     ];
+        // }
+        $bcs = new BodyCountScore();
+        $bcs->livestock_id = 2;
+        //$bcs->user_id = Yii::$app->user->id;
+        if ($bcs->load(Yii::$app->request->post()) && $bcs->save()) {
+            Yii::$app->response->statusCode = 201;
+            return $this -> render('bcs',[
+                'message' => 'Kandang berhasil dibuat',
+                'error' => false,
+                'data' => $bcs,
+            ]);
+            
+        }
+        else {
+            Yii::$app->response->statusCode = 400;
+            return $this -> render ('error',[
+                'message' => 'Gagal membuat kandang', 
+                'error' => true, 
+                'details' => $this->getValidationErrors($bcs),
+            ]);}
+        }
 }

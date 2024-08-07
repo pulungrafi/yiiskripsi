@@ -5,16 +5,16 @@ use yii\helpers\Url;
 
 /**
  * @var AppView $this
- * @var string $name
  * @var string $message
+ * @var string $details
  * @var Exception $exception
  */
 
-$this->title = $this->params['pageName'] = $name;
+$this->title = $this->params['pageName'] = $message;
 ?>
 
 <div class="error-page">
 	<p class="fs-5 text-gray-600">
-		<?= nl2br(Html::encode($message)) ?>
+		<?= nl2br(Html::encode($details)) ?>
 	</p>
 </div>

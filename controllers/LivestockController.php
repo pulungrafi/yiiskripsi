@@ -20,7 +20,7 @@ use yii\helpers\FileHelper;
 use Google\Cloud\Storage\StorageClient;
 use Google\Cloud\Storage\Acl;
 
-class LivestockController extends Controller
+class LivestockController extends SiteController
 {
     public $modelClass = 'app\models\Livestock';
 
