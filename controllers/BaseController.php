@@ -9,27 +9,27 @@ use yii\web\Controller;
 
 class BaseController extends Controller
 {
-    protected $noAuthActions = [];
+    // protected $noAuthActions = [];
 
-    public function beforeAction($action)
-    {
-        if (!parent::beforeAction($action)) {
-            return false;
-        }
+    // public function beforeAction($action)
+    // {
+    //     if (!parent::beforeAction($action)) {
+    //         return false;
+    //     }
 
-        // Skip token verification for specified actions
-        if (in_array($action->id, $this->noAuthActions)) {
-            return true; 
-        }
+    //     // Skip token verification for specified actions
+    //     if (in_array($action->id, $this->noAuthActions)) {
+    //         return true; 
+    //     }
 
-        $token = Yii::$app->request->getHeaders()->get('Authorization');
-        if ($token !== null && !User::verifyJwt($token)) {
-            throw new \yii\web\UnauthorizedHttpException('Your token is invalid or expired.');
-            return false;
-        }
+    //     $token = Yii::$app->request->getHeaders()->get('Authorization');
+    //     if ($token !== null && !User::verifyJwt($token)) {
+    //         throw new \yii\web\UnauthorizedHttpException('Your token is invalid or expired.');
+    //         return false;
+    //     }
 
-        return true;
-    }
+    //     return true;
+    // }
 
     public function getValidationErrors($model)
     {

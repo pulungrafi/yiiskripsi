@@ -1,5 +1,4 @@
-<?php
-
+<?php 
 namespace app\models;
 
 use Yii;
@@ -17,18 +16,13 @@ class LoginForm extends Model
 
     private $_user;
 
-
     /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
-            // username and password are both required
             [['username', 'password'], 'required'],
-            // rememberMe must be a boolean value
-            ['rememberMe', 'boolean'],
-            // password is validated by validatePassword()
             ['password', 'validatePassword'],
         ];
     }
@@ -54,19 +48,18 @@ class LoginForm extends Model
     /**
      * Logs in a user using the provided username and password.
      *
-     * @return string|null the JWT token if the user is logged in successfully, otherwise null
+     * @return bool whether the user is logged in successfully
      */
     public function login()
     {
-        if ($this->validate() && $this->getUser()) {
-            // Perbarui auth_key jika login berhasil
-            $this->_user->generateJwt();
-            $this->_user->save(false);
-
-            // Mengembalikan auth_key sebagai token otentikasi
-            return $this->_user->auth_key;
+        if ($this->validate()) {
+            $user = $this->getUser();
+            if ($user) {
+                // Log in the user using session
+                return Yii::$app->user->login($user, $this->rememberMe ? 3600 * 24 * 30 : 0);
+            }
         }
-        return null;
+        return false;
     }
 
     /**
@@ -83,26 +76,3 @@ class LoginForm extends Model
         return $this->_user;
     }
 }
-
-// public function login()
-//     {
-//         if ($this->validate()) {
-//             $user = $this->getUser();
-//             if ($user) {
-//                 // Generate JWT token
-//                 $jwtToken = $user->generateJwt();
-
-//                 // Use Yii2's cache to store the JWT token
-//                 // The key is prefixed with 'jwt_' for clarity, adjust as needed
-//                 $cacheKey = 'jwt_' . $user->id;
-//                 $expiration = 3600; // Token expiration time in seconds, adjust as needed
-
-//                 // Save JWT token to cache
-//                 Yii::$app->cache->set($cacheKey, $jwtToken, $expiration);
-
-//                 // Return the JWT token
-//                 return $jwtToken;
-//             }
-//         }
-//         return null;
-//     }

@@ -22,6 +22,7 @@ use app\models\NoteImage;
 use app\models\RegisterForm;
 use app\models\RequestPasswordResetForm;
 use app\models\User;
+use yii\helpers\Url;
 
 
 
@@ -34,23 +35,23 @@ class SiteController extends Controller
     {
         $behaviors = parent::behaviors();
         
-        $behaviors['access'] = [
-                'class' => AccessControl::className(),
-                'only' => ['logout'],
-                'rules' => [
-                    [
-                        'actions' => ['logout'],
-                        'allow' => true,
-                        'roles' => ['@'],
-                    ],
-                ],
-            ];
-        $behaviors['verbs'] = [
-            'class' => VerbFilter::className(),
-            'actions' => [
-                'logout' => ['post'],
-             ],
-        ];
+        // $behaviors['access'] = [
+        //         'class' => AccessControl::className(),
+        //         'only' => ['logout'],
+        //         'rules' => [
+        //             [
+        //                 'actions' => ['logout'],
+        //                 'allow' => true,
+        //                 'roles' => ['@'],
+        //             ],
+        //         ],
+        //     ];
+        // $behaviors['verbs'] = [
+        //     'class' => VerbFilter::className(),
+        //     'actions' => [
+        //         'logout' => ['post'],
+        //      ],
+        // ];
             return $behaviors;
     }
     public function getValidationErrors($model)
@@ -71,16 +72,11 @@ class SiteController extends Controller
             return false;
         }
 
-        // Skip token verification for specified actions
-        if (in_array($action->id, $this->noAuthActions)) {
-            return true; 
-        }
+        // CEK PENGGUNAA DISINI HARUS TIDAK GUEST
+        // if (Yii::$app->user->isGuest) {
+        //    return Url::to(array('user/index'));
 
-        $token = Yii::$app->request->getHeaders()->get('Authorization');
-        if ($token !== null && !User::verifyJwt($token)) {
-            throw new \yii\web\UnauthorizedHttpException('Your token is invalid or expired.');
-            return false;
-        }
+        // }
 
         return true;
     }
@@ -108,15 +104,17 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        $livestock = Livestock::find()->all();
-        $cage = Cage::find()->all();
+        $userId = Yii::$app->user->id;
 
-        return $this->render('index', [
-            'sapi' => count($livestock),
-            'cage' => count($cage),
-        ]);
+            $livestockCount = Livestock::find()->where(['user_id' => $userId])->count();
+            $cageCount = Cage::find()->where(['user_id' => $userId])->count();
+            
+            return $this->render('index', [
+                'sapi' => $livestockCount,
+                'cage' => $cageCount,
+            ]);
+        
     }
-
     /**
      * Login action.
      *

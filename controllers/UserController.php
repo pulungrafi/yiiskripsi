@@ -3,18 +3,14 @@
 namespace app\controllers;
 
 use Yii;
-use yii\filters\auth\HttpBearerAuth;
 use app\models\User;
-use app\models\Livestock;
-use app\models\Cage;
 use app\models\LoginForm;
 use app\models\RegisterForm;
 use app\models\EditProfileForm;
 use app\models\RequestPasswordResetForm;
-use app\controllers\BaseController;
 use app\controllers\SiteController;
 use yii\web\BadRequestHttpException;
-use yii\web\Controller;
+use yii\helpers\Url;
 
 class UserController extends SiteController
 {
@@ -32,25 +28,25 @@ class UserController extends SiteController
     }
     protected $noAuthActions = [];
 
-    public function beforeAction($action)
-    {
-        if (!parent::beforeAction($action)) {
-            return false;
-        }
+    // public function beforeAction($action)
+    // {
+    //     if (!parent::beforeAction($action)) {
+    //         return false;
+    //     }
 
-        // Skip token verification for specified actions
-        if (in_array($action->id, $this->noAuthActions)) {
-            return true; 
-        }
+    //     // Skip token verification for specified actions
+    //     if (in_array($action->id, $this->noAuthActions)) {
+    //         return true; 
+    //     }
 
-        $token = Yii::$app->request->getHeaders()->get('Authorization');
-        if ($token !== null && !User::verifyJwt($token)) {
-            throw new \yii\web\UnauthorizedHttpException('Your token is invalid or expired.');
-            return false;
-        }
+    //     $token = Yii::$app->request->getHeaders()->get('Authorization');
+    //     if ($token !== null && !User::verifyJwt($token)) {
+    //         throw new \yii\web\UnauthorizedHttpException('Your token is invalid or expired.');
+    //         return false;
+    //     }
 
-        return true;
-    }
+    //     return true;
+    // }
 
     public function init()
     {
@@ -66,10 +62,10 @@ class UserController extends SiteController
         $behaviors = parent::behaviors();
 
         // authenticator untuk otentikasi
-        $behaviors['authenticator'] = [
-            'class' => HttpBearerAuth::class,
-            'except' => ['signup','index','register', 'login', 'verify-email', 'request-password-reset'],
-        ];
+        // $behaviors['authenticator'] = [
+        //     'class' => HttpBearerAuth::class,
+        //     'except' => ['signup','index','register', 'login', 'verify-email', 'request-password-reset', 'logout'],
+        // ];
 
         // VerbFilter untuk memastikan setiap action hanya menerima HTTP method yang sesuai
         $behaviors['verbs'] = [
@@ -91,13 +87,16 @@ class UserController extends SiteController
     public function actionIndex()
     {
         $model = new LoginForm();
+        // echo Yii::$app->request->post();
         return $this->render('index', [
             'model' => $model,
         ]);
     }
     public function actionSignup()
     {
+        $model = new RegisterForm();
         return $this->render('signup', [
+            'model' => $model,
         ]);
     }
 
@@ -109,72 +108,22 @@ class UserController extends SiteController
     public function actionRegister()
     {
         $model = new RegisterForm();
-        $model->load(Yii::$app->request->getBodyParams(), '');
+    $params = Yii::$app->request->post('RegisterForm', []);
+    $model->load(['RegisterForm' => $params]);
 
         if (!$model->validate()) {
-            $errors = $model->getErrors();
-            if ($this->isUsernameOrEmailTaken($errors)) {
-                Yii::$app->response->setStatusCode(409); // Conflict
-                return [
-                    'message' => 'Email atau username sudah digunakan oleh pengguna lain.',
-                    'error' => true,
-                    'details' => $this->getValidationErrors($model),
-                ];
-            } else {
-                Yii::$app->response->setStatusCode(400); // Bad Request
-                return [
-                    'message' => 'Atribut ada yang kosong atau format tidak valid.',
-                    'error' => true,
-                    'details' => $this->getValidationErrors($model),
-                ];
-            }
-        }
+        // Debug validation errors
+        var_dump($model->getErrors());
+        return $this->render('signup', [
+            'model' => $model,
+        ]);
+    }
 
-        // Generate a verification token that includes the user's data
-        $userData = [
-            'username' => $model->username,
-            'email' => $model->email,
-            'password_hash' => Yii::$app->security->generatePasswordHash($model->password),
-        ];
-        $tokenData = base64_encode(json_encode($userData));
-        $model->verification_token = $tokenData;
+    $user = $model->register();
+    if (!is_null($user)) {
+        return $this->redirect(['/']);
+    }
 
-        $user = $model->register();
-
-        if ($user instanceof User) {
-            $user->verification_token = $tokenData;
-
-            $userData = $user->toArray(['id', 'username', 'email']);
-
-            try {
-                Yii::$app->mailer->compose(['html' => '@app/mail/emailVerify-html', 'text' => '@app/mail/emailVerify-text'], ['user' => $user])
-                    ->setFrom(['digiternak@gmail.com' => ' Digiternak'])
-                    ->setTo($user->email)
-                    ->setSubject('Account registration at Digiternak')
-                    ->send();
-
-                Yii::$app->response->setStatusCode(201); // Created
-                return [
-                    'message' => 'Akun berhasil dibuat. Silakan cek email Anda untuk verifikasi.',
-                    'error' => false,
-                    'data' => $userData,
-                ];
-            } catch (\Exception $e) {
-                Yii::$app->response->setStatusCode(500); // Internal Server Error
-                return [
-                    'message' => 'Gagal mengirim email verifikasi.',
-                    'error' => true,
-                    'details' => $e->getMessage(),
-                ];
-            }
-        } else {
-            Yii::$app->response->setStatusCode(400); // Bad Request
-            return [
-                'message' => 'Atribut ada yang kosong atau format tidak valid.',
-                'error' => true,
-                'details' => $this->getValidationErrors($model),
-            ];
-        }
     }
 
     /**
@@ -237,52 +186,49 @@ class UserController extends SiteController
     public function actionLogin()
     {
         $model = new LoginForm();
-        $params = Yii::$app->request->getBodyParams();
-        $model->load($params, '');
+    $params = Yii::$app->request->post('LoginForm', []);
+    $model->load(['LoginForm' => $params]);
 
-        // Check if the required fields are present
-        if (!isset($params['username']) || !isset($params['password'])) {
-            Yii::$app->response->statusCode = 400; // Bad Request
-            return [
-                'message' => 'Field username dan password harus diisi.',
-                'error' => true
-            ];
-        }
 
         if ($model->login()) {
-            // If login is successful
-            $user = User::findByUsername($model->username);
-
-            // Check if the user's email has been verified
-            if ($user->verification_token !== null) {
-                Yii::$app->session->setFlash('error', 'Email belum diverifikasi. Silakan cek email Anda untuk instruksi verifikasi.');
-                // If the user's email has not been verified
-                Yii::$app->response->statusCode = 401; // Unauthorized
-                return $this->redirect('index',[
-                    'message' => 'Email belum diverifikasi. Silakan cek email Anda untuk instruksi verifikasi.',
-                    'error' => true,
-                ]);
-            }
-
-            // Inform the client that the user has logged in successfully
-            Yii::$app->response->statusCode = 200; // OK
-            return [
-                'message' => 'Pengguna berhasil login.',
-                'error' => false,
-                'data' => [
-                    'token' => $user->auth_key,
-                    'id' => $user->id,
-                ]
-            ];
-        } 
-            else {
-            // If login fails
-            Yii::$app->response->statusCode = 401; // Unauthorized
-            return [
-                'message' => 'Username atau password salah. Silakan coba lagi.',
-                'error' => true
-            ];
+            return $this->redirect(['site/index']);
+        }else{
+            return $this->render('index', [
+                'model' => $model,
+            ]);
         }
+        //     // If login is successful
+            // $user = User::findByUsername($model->username);
+
+        //     // Check if the user's email has been verified
+        //     if ($user->verification_token !== null) {
+        //         // If the user's email has not been verified
+        //         Yii::$app->response->statusCode = 401; // Unauthorized
+        //         return [
+        //             'message' => 'Email belum diverifikasi. Silakan cek email Anda untuk instruksi verifikasi.',
+        //             'error' => true,
+        //         ];
+        //     }
+
+        //     // Inform the client that the user has logged in successfully
+        //     Yii::$app->response->statusCode = 200; // OK
+        //     return [
+        //         'message' => 'Pengguna berhasil login.',
+        //         'error' => false,
+        //         'data' => [
+        //             'token' => $user->auth_key,
+        //             'id' => $user->id,
+        //         ]
+        //     ];
+        // } 
+        //     else {
+        //     // If login fails
+        //     Yii::$app->response->statusCode = 401; // Unauthorized
+        //     return [
+        //         'message' => 'Username atau password salah. Silakan coba lagi.',
+        //         'error' => true
+        //     ];
+        // }
     }
 
     /**
@@ -292,31 +238,11 @@ class UserController extends SiteController
      */
     public function actionLogout()
     {
-        $user = Yii::$app->user->identity;
-
-        // Check if the currently logged-in user exists
-        if (!$user) {
-            return [
-                'message' => 'Pengguna tidak ditemukan',
-                'error' => true,
-            ];
-        }
-
-        // Invalidate the token
-        $user->auth_key = null;
-        if ($user !== null) {
-            User::updateAll(['auth_key' => null], 'id = :id', [':id' => $user->id]);
-        }
-
-        // Perform the logout process
         Yii::$app->user->logout();
-
-        return [
-            'message' => 'Pengguna berhasil logout',
-            'error' => false,
-        ];
+        $loginUrl = Url::toRoute(['/']);
+        return Yii::$app->response->redirect($loginUrl);
     }
-
+    
     /**
      * Handle retrieving user data.
      *

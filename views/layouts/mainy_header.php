@@ -2,7 +2,8 @@
 
 use yii2\theme\mazer\MainAsset;
 use yii\helpers\Html;
-use yii\helpers\Url;
+use yii\helpers\Url;;
+use yii\widgets\ActiveForm;
 
 /**
  * @var yii\web\View $this
@@ -104,12 +105,18 @@ $themeMazer = MainAsset::register($this);
 							<hr class="dropdown-divider">
 						</li>
 						<li>
-						<form action="<?= Url::toRoute(['/user/index']) ?>" method="" style="display: inline;">
-							<button type="submit" class="dropdown-item">
-								<i class="icon-mid bi bi-box-arrow-left me-2"></i>
-								Logout
-							</button>
-						</form>
+						<?php $form = ActiveForm::begin([
+    'action' => Url::to(['/user/logout']),
+    'method' => 'post',
+    'options' => ['style' => 'display: inline;'],
+]); ?>
+    <?= Html::hiddenInput(Yii::$app->request->csrfParam, Yii::$app->request->csrfToken) ?>
+    <button type="submit" class="dropdown-item">
+        <i class="icon-mid bi bi-box-arrow-left me-2"></i>
+        Logout
+    </button>
+<?php ActiveForm::end(); ?>
+
 						</li>
 					</ul>
 				</div>

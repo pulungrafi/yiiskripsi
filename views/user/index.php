@@ -18,9 +18,9 @@ $themeMazer = MainAsset::register($this);
 <div class="row h-100">
     <div class="col-lg-5 col-12">
         <div id="auth-center">
-            <div class="auth-logo">
+            <div class="auth-logo" style="50">
                 <a href="<?= Url::current() ?>">
-                    <img src="<?= "{$themeMazer->baseUrl}/images/logo/logo.svg" ?>" alt="Logo" />
+                    <img src="<?= "{$themeMazer->baseUrl}/images/logo/logo.svg" ?>" alt="Logo" style="    width: 200px;"/>
                 </a>
             </div>
             <h1 class="auth-title">Log in.</h1>
@@ -38,22 +38,25 @@ $themeMazer = MainAsset::register($this);
                 </div>
             <?php endif; ?>
             
-            <form action="index.html">
+
+
+            <!-- <form> -->
                 <?php $form = ActiveForm::begin([
                     'id' => 'login-form',
                     'action' => ['user/login'],
-                    'method'=> 'POST',
-                    'enableClientValidation'=>true,
-                ]); ?>
+                    'method'=> 'post'               
+                    ]); ?>
                 <div class="form-group position-relative mb-4">
                     <?= $form->field($model, 'username')->textInput(['maxlength' => true]) ?>
                 </div>
                 <div class="form-group position-relative mb-4">
                     <?= $form->field($model, 'password')->passwordInput(['maxlength' => true]) ?>
                 </div>
-                <?= Html::submitButton('Submit', ['class' => 'btn btn-primary']) ?>
+                <?= Html::submitButton('login', ['class' => 'btn btn-primary']) ?>
+
+
                 <?php ActiveForm::end(); ?>
-            </form>
+            <!-- </form> -->
             <div class="text-center mt-5 text-lg fs-4">
                 <p class="text-gray-600">
                     Don't have an account?
