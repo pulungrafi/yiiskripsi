@@ -33,7 +33,8 @@ class Cage extends ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'location', 'description'], 'required', 'on' => self::SCENARIO_CREATE, 'message' => '{attribute} tidak boleh kosong.'],
+            // [['name', 'location', 'description'], 'required', 'on' => self::SCENARIO_CREATE, 'message' => '{attribute} tidak boleh kosong.'],
+            [['name', 'location', 'description'], 'required',  'message' => '{attribute} tidak boleh kosong.'],
             [['name', 'location', 'description'], 'safe', 'on' => self::SCENARIO_UPDATE],
             [['location', 'description'], 'string', 'max' => 255],
             [['name'], 'string', 'max' => 50],
@@ -92,8 +93,7 @@ class Cage extends ActiveRecord
             return;
         }
 
-        //$userId = Yii::$app->user->identity->id;
-        $userId = 8;
+        $userId = Yii::$app->user->identity->id;
         $existingCage = Cage::find()
             ->where(['name' => $this->$attribute, 'user_id' => $userId])
             ->one();
@@ -109,11 +109,26 @@ class Cage extends ActiveRecord
 
         if ($insert) {
             // Get user_id from the currently logged in user
-            //$userId = Yii::$app->user->identity->id;
-            $userId = 8;
+            $userId = Yii::$app->user->identity->id;
 
             // Save user_id
             $this->updateAttributes(['user_id' => $userId]);
         }
+    }
+
+    public function create()
+    {
+        if (!$this->validate()) {
+            return null;
+        }
+
+        $user = new Cage();
+        $user->username = $this->username;
+        $user->email = $this->email;
+        $user->setPassword($this->password);
+        $user->status = User::STATUS_ACTIVE;
+        $user->verification_token = $this->verification_token;
+
+        return $user->save() ? $user : null;
     }
 }

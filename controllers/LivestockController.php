@@ -44,12 +44,6 @@ class LivestockController extends SiteController
     {
         $behaviors = parent::behaviors();
 
-        // authenticator untuk otentikasi
-        $behaviors['authenticator'] = [
-            'class' => HttpBearerAuth::class,
-            'except' => ['options'], 
-        ];
-
         // VerbFilter untuk memastikan setiap action hanya menerima HTTP method yang sesuai
         $behaviors['verbs'] = [
             'class' => VerbFilter::class,
@@ -67,6 +61,10 @@ class LivestockController extends SiteController
         return $behaviors;
     }
 
+    public function actionIndex(){
+        return $this ->render('index'); 
+    }
+    
     /**
      * Membuat data Livestock baru.
      * @return mixed

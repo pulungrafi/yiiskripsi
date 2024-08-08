@@ -4,9 +4,12 @@ use yii2\theme\mazer\MainAsset;
 use yii\helpers\Html;
 use yii\helpers\Url;;
 use yii\widgets\ActiveForm;
+$username = Yii::$app->user->identity->username ?? '';
+ 
 
 /**
  * @var yii\web\View $this
+ * @var app\models\User $name
  */
 
 $themeMazer = MainAsset::register($this);
@@ -25,19 +28,7 @@ $themeMazer = MainAsset::register($this);
 
 			<div class="collapse navbar-collapse" id="navbarSupportedContent">
 				<ul class="navbar-nav ms-auto mb-lg-0">
-					<li class="nav-item dropdown me-1">
-						<a class="nav-link active dropdown-toggle text-gray-600" href="#" data-bs-toggle="dropdown" aria-expanded="false">
-							<i class='bi bi-envelope bi-sub fs-4'></i>
-						</a>
-						<ul class="dropdown-menu dropdown-menu-end shadow-lg" aria-labelledby="dropdownMenuButton">
-							<li>
-								<h6 class="dropdown-header">Mail</h6>
-							</li>
-							<li><a class="dropdown-item" href="#">No new mail</a></li>
-						</ul>
-					</li>
-
-					<li class="nav-item dropdown me-3">
+					<!-- <li class="nav-item dropdown me-3">
 						<a class="nav-link active dropdown-toggle text-gray-600" href="#" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
 							<i class='bi bi-bell bi-sub fs-4'></i>
 						</a>
@@ -71,15 +62,15 @@ $themeMazer = MainAsset::register($this);
 								<p class="text-center py-2 mb-0"><a href="#">See all notification</a></p>
 							</li>
 						</ul>
-					</li>
+					</li> -->
 				</ul>
 
 				<div class="dropdown">
 					<a href="#" data-bs-toggle="dropdown" aria-expanded="false">
 						<div class="user-menu d-flex">
 							<div class="user-name text-end me-3">
-								<h6 class="mb-0 text-gray-600">.</h6>
-								<p class="mb-0 text-sm text-gray-600">Administrator</p>
+								<h6 class="mb-0 text-gray-600">Hi,</h6>
+								<p class="mb-0 text-sm text-gray-600"><?= Html::encode($username) ?></p>
 							</div>
 							<div class="user-img d-flex align-items-center">
 								<div class="avatar avatar-md">

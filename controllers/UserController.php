@@ -107,13 +107,12 @@ class UserController extends SiteController
      */
     public function actionRegister()
     {
-        $model = new RegisterForm();
+    $model = new RegisterForm();
     $params = Yii::$app->request->post('RegisterForm', []);
     $model->load(['RegisterForm' => $params]);
 
         if (!$model->validate()) {
         // Debug validation errors
-        var_dump($model->getErrors());
         return $this->render('signup', [
             'model' => $model,
         ]);
@@ -186,8 +185,8 @@ class UserController extends SiteController
     public function actionLogin()
     {
         $model = new LoginForm();
-    $params = Yii::$app->request->post('LoginForm', []);
-    $model->load(['LoginForm' => $params]);
+        $params = Yii::$app->request->post('LoginForm', []);
+        $model->load(['LoginForm' => $params]);
 
 
         if ($model->login()) {

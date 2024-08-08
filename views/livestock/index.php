@@ -1,6 +1,7 @@
 <?php
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use yii\helpers\Url;
 /**
  * @var \yii\web\View $this
  * @var yii\widgets\ActiveForm $form
@@ -22,8 +23,8 @@ $this->title = 'Daftar Sapi';
                                 <?php $form = ActiveForm::begin(); ?>
                                     <div class="form-body">
                                         <?= $form->field($livestock, 'name')->textInput(['maxlength' => true]) ?>
-                                        // <?= $form->field($cage, 'location')->textInput(['maxlength' => true]) ?>
-                                        // <?= $form->field($cage, 'description')->textarea(['rows' => 6]) ?>
+                                        <?= $form->field($cage, 'location')->textInput(['maxlength' => true]) ?>
+                                        <?= $form->field($cage, 'description')->textarea(['rows' => 6]) ?>
                                     </div>
                                     <div class="form-actions d-flex justify-content-end mt-3">
                                                 <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

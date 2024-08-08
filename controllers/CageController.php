@@ -37,10 +37,10 @@ class CageController extends SiteController
         $behaviors = parent::behaviors();
 
         // Menambahkan authenticator untuk otentikasi menggunakan access token
-        $behaviors['authenticator'] = [
-            'class' => HttpBearerAuth::class,
-            'except' => ['options'],
-        ];
+        // $behaviors['authenticator'] = [
+        //     'class' => HttpBearerAuth::class,
+        //     'except' => ['options'],
+        // ];
 
         // Menambahkan VerbFilter untuk memastikan setiap action hanya menerima HTTP method yang sesuai
         $behaviors['verbs'] = [
@@ -65,11 +65,11 @@ class CageController extends SiteController
         }
 
         // Since all actions require a token, directly verify the token without checking the action's id
-        $token = Yii::$app->request->getHeaders()->get('Authorization');
-        if ($token !== null && !User::verifyJwt($token)) {
-            throw new \yii\web\UnauthorizedHttpException('Your token is invalid or expired.');
-            return false;
-        }
+        // $token = Yii::$app->request->getHeaders()->get('Authorization');
+        // if ($token !== null && !User::verifyJwt($token)) {
+        //     throw new \yii\web\UnauthorizedHttpException('Your token is invalid or expired.');
+        //     return false;
+        // }
 
         return true; // Proceed with the action since the token is valid
     }
@@ -80,9 +80,18 @@ class CageController extends SiteController
      */
     public function actionIndex()
     {
-        $cages = Cage::find()->all();
+        $model = new Cage();
+        $userId = Yii::$app->user->identity->id;
+        $error = [];
+
+        // Get the list of cages based on user_id
+        $cage = Cage::find()
+            ->where(['user_id' => $userId])
+            ->all();
         return $this-> render('index',[
-            'cages' => $cages,
+            'cage' => $cage,
+            'model' => $model,
+            'error' => $error,
         ]);
     }
 
@@ -149,32 +158,23 @@ class CageController extends SiteController
      */
     public function actionCreate()
     {
-        $cage = new Cage();
-        $cage->scenario = Cage::SCENARIO_CREATE;
-
-        $cage->load(Yii::$app->request->getBodyParams(), '');
-        $cage->user_id = Yii::$app->user->id;
-        if ($cage->load(Yii::$app->request->post()) && $cage->save()) {
-            Yii::$app->response->statusCode = 201;
-            return [
-                'message' => 'Kandang berhasil dibuat',
-                'error' => false,
-                'data' => $cage,
-                $this -> redirect(['view', 'id' => $cage->id]),
-            ];
-        } else {
-            Yii::$app->response->statusCode = 400;
-            return [
-                'message' => 'Gagal membuat kandang', 
-                'error' => true, 
-                'details' => $this->getValidationErrors($cage),
-            ];
+        $model = new Cage();
+        // $model->scenario = Cage::SCENARIO_CREATE;
+        $model->user_id = Yii::$app->user->id;
+        $params = Yii::$app->request->post('Cage', []);
+        $model->load(['Cage' => $params]);
+        if (!$model->validate()) {
+            // Debug validation errors
+            var_dump($model->getErrors());
+            return $this->render('index', [
+                'model' => $model,
+            ]); 
+        }else{
+            $model->save();
+            return $this->redirect(['index']);
         }
-        return $this->render('create-kandang', [
-            'cage' => $cage,
-        ]);
     }
-
+    
     /**
      * Mengupdate data Cage berdasarkan ID.
      * @param integer $id
@@ -182,26 +182,30 @@ class CageController extends SiteController
      */
     public function actionUpdate($id)
     {
-        $cage = Cage::findOne($id);
+        // Find the cage by ID
+        $model = Cage::findOne($id);
 
-        $cage->scenario = Cage::SCENARIO_UPDATE;
-
-        $cage->load(Yii::$app->request->getBodyParams(), '');
-        if ($cage->save()) {
-            Yii::$app->response->statusCode = 200;
-            return [
-                'message' => 'Kandang berhasil diperbarui',
-                'error' => false, 
-                'data' => $cage,
-            ];
-        } else {
-            Yii::$app->response->statusCode = 400;
-            return [
-                'message' => 'Gagal memperbarui kandang',
-                'error' => true, 
-                'details' => $this->getValidationErrors($cage),
-            ];
+        // Check if the cage exists
+        if (!$model) {
+            Yii::$app->session->setFlash('error', 'Kandang tidak ditemukan.');
+            return $this->redirect(['index']);
         }
+
+        // If the form is submitted
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            // Save the changes
+            if ($model->save()) {
+                Yii::$app->session->setFlash('success', 'Kandang berhasil diperbarui.');
+                return $this->redirect(['index']);
+            } else {
+                Yii::$app->session->setFlash('error', 'Gagal memperbarui data.');
+            }
+        }
+
+        // Render the update view with the model data
+        return $this->render('update', [
+            'model' => $model,
+        ]);
     }
 
     /**
@@ -211,38 +215,33 @@ class CageController extends SiteController
      */
     public function actionDelete($id)
     {
-        if (!ctype_digit($id)) {
-            Yii::$app->response->statusCode = 404;
-            return [
-                'message' => 'Invalid ID',
-                'error' => true,
-            ];
-        }
-    
         $cage = Cage::findOne($id);
-    
-        if ($cage) {
-            if (!empty($cage->livestocks)) {
-                Yii::$app->response->statusCode = 400;
-                return [
-                    'message' => 'Kandang tidak dapat dihapus karena masih memiliki hewan ternak di dalamnya.',
-                    'error' => true,
-                ];
+        if ($cage->delete()) {
+                Yii::$app->session->setFlash('success', 'Kandang berhasil dihapus.');
+                return $this->redirect(['cage/index']);
             }
+
+        // if (!ctype_digit($id)) {
+        //     Yii::$app->session->setFlash('error', 'ID tidak valid.');
+        //     return $this->redirect(['cage/index']);
+        // }
     
-            if ($cage->delete()) {
-                Yii::$app->response->statusCode = 204;
-                return [
-                    'message' => 'Kandang berhasil dihapus',
-                    'error' => false,
-                ];
-            }
-        }
     
-        Yii::$app->response->statusCode = 404;
-        return [
-            'message' => 'Gagal menghapus kandang, kandang tidak ditemukan.',
-            'error' => true,
-        ];
+        // if ($cage) {
+        //     if (!empty($cage->livestocks)) {
+        //         Yii::$app->session->setFlash('error', 'Kandang tidak dapat dihapus karena masih memiliki hewan ternak di dalamnya.');
+        //         return $this->redirect(['cage/index']);
+        //     }    
+        //     if ($cage->delete()) {
+        //         Yii::$app->session->setFlash('success', 'Kandang berhasil dihapus.');
+        //         return $this->redirect(['cage/index']);
+        //     }
+        // }
+    
+        // Yii::$app->response->statusCode = 404;
+        // return [
+        //     'message' => 'Gagal menghapus kandang, kandang tidak ditemukan.',
+        //     'error' => true,
+        // ];
     }
 }

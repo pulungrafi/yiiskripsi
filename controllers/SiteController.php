@@ -31,7 +31,9 @@ class SiteController extends Controller
     /**
      * {@inheritdoc}
      */
-    public function behaviors()
+    public $enableCsrfValidation = false;
+
+     public function behaviors()
     {
         $behaviors = parent::behaviors();
         
@@ -73,10 +75,11 @@ class SiteController extends Controller
         }
 
         // CEK PENGGUNAA DISINI HARUS TIDAK GUEST
-        // if (Yii::$app->user->isGuest) {
-        //    return Url::to(array('user/index'));
+        if (Yii::$app->user->isGuest) {
+           return Url::to(array('bcs'));
 
-        // }
+        }
+        
 
         return true;
     }
@@ -104,7 +107,13 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        $userId = Yii::$app->user->id;
+        if (Yii::$app->user->isGuest) {
+            $redirect = Url::to(['user/index']);
+            $model = new LoginForm();
+            return $this-> render($redirect , ['model'=> $model]);
+ 
+         }
+        else{$userId = Yii::$app->user->id;
 
             $livestockCount = Livestock::find()->where(['user_id' => $userId])->count();
             $cageCount = Cage::find()->where(['user_id' => $userId])->count();
@@ -113,7 +122,7 @@ class SiteController extends Controller
                 'sapi' => $livestockCount,
                 'cage' => $cageCount,
             ]);
-        
+        }
     }
     /**
      * Login action.
@@ -188,7 +197,6 @@ class SiteController extends Controller
 
         // Validasi cage_id berdasarkan user_id
         $cageId = $model->cage_id;
-        $userId = 8;
         // $userId = Yii::$app->user->identity->id;
 
         if ($cageId === null) {

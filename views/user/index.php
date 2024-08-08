@@ -18,25 +18,13 @@ $themeMazer = MainAsset::register($this);
 <div class="row h-100">
     <div class="col-lg-5 col-12">
         <div id="auth-center">
-            <div class="auth-logo" style="50">
+            <div class="auth-logo">
                 <a href="<?= Url::current() ?>">
                     <img src="<?= "{$themeMazer->baseUrl}/images/logo/logo.svg" ?>" alt="Logo" style="    width: 200px;"/>
                 </a>
             </div>
             <h1 class="auth-title">Log in.</h1>
             <p class="auth-subtitle mb-5">Log in with your data that you entered during registration.</p>
-
-            <?php if (Yii::$app->session->hasFlash('success')): ?>
-                <div class="alert alert-success">
-                    <?= Yii::$app->session->getFlash('success') ?>
-                </div>
-            <?php endif; ?>
-
-            <?php if (Yii::$app->session->hasFlash('error')): ?>
-                <div class="alert alert-danger">
-                    <?= Yii::$app->session->getFlash('error') ?>
-                </div>
-            <?php endif; ?>
             
 
 
@@ -44,7 +32,7 @@ $themeMazer = MainAsset::register($this);
                 <?php $form = ActiveForm::begin([
                     'id' => 'login-form',
                     'action' => ['user/login'],
-                    'method'=> 'post'               
+                    'method'=> 'POST'               
                     ]); ?>
                 <div class="form-group position-relative mb-4">
                     <?= $form->field($model, 'username')->textInput(['maxlength' => true]) ?>
@@ -60,7 +48,7 @@ $themeMazer = MainAsset::register($this);
             <div class="text-center mt-5 text-lg fs-4">
                 <p class="text-gray-600">
                     Don't have an account?
-                    <a href="<?= Url::toRoute(['signup']) ?>" class="font-bold">
+                    <a href="<?= Url::toRoute(['user/signup']) ?>" class="font-bold">
                         SignUp
                     </a>.
                 </p>
