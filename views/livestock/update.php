@@ -1,0 +1,118 @@
+<?php
+use yii\helpers\Html;
+use yii\widgets\ActiveForm;
+use yii\helpers\Url;
+use app\models\Cage;
+
+/* @var $this yii\web\View */
+/* @var $model app\models\Cage */
+/* @var $form yii\widgets\ActiveForm */
+
+$this->title = 'Update Kandang: ' . $model->name;
+?>
+
+<div class="cage-update">
+
+        <?php $form = ActiveForm::begin([
+            'id' => 'update-form',
+            'method' => 'put',
+        ]); ?>
+<div class="form-body">
+                                        <div class="form-body row">
+                                            <div class = "col">
+                                            <?= $form->field($model, 'eid')->textInput(['maxlength' => true, 'placeholder' => 'Masukkan kode EID']) ?>
+                                            <?= $form->field($model, 'name')->textInput(['maxlength' => true, 'placeholder' => 'Masukkan nama hewan ternak']) ?>
+                                            
+                                            <?= $form->field($model, 'birthdate')->input('date', ['placeholder' => 'Masukkan tanggal lahir']) ?>
+                                            
+                                            <?= $form->field($model, 'cage_id')->dropDownList(
+                                                \yii\helpers\ArrayHelper::map(Cage::find()->where(['user_id' => Yii::$app->user->id])->all(), 'id', 'name'),
+                                                ['prompt' => 'Pilih Kandang']
+                                            ) ?>
+
+                                            <?= $form->field($model, 'type_of_livestock')->dropDownList([
+                                                'Kambing' => 'Kambing',
+                                                'Sapi' => 'Sapi',
+                                            ], ['prompt' => 'Pilih jenis hewan ternak']) ?>
+
+                                            <?= $form->field($model, 'breed_of_livestock')->dropDownList([
+                                                'Madura' => 'Madura',
+                                                'Bali' => 'Bali',
+                                                'Limousin' => 'Limousin',
+                                                'Brahman' => 'Brahman',
+                                            ], ['prompt' => 'Pilih ras hewan ternak']) ?>
+
+                                            <?= $form->field($model, 'purpose')->dropDownList([
+                                                'Indukan' => 'Indukan',
+                                                'Penggemukan' => 'Penggemukan',
+                                                'Tabungan' => 'Tabungan',
+                                                'Belum Tahu' => 'Belum Tahu',
+                                            ], ['prompt' => 'Pilih tujuan pemeliharaan']) ?>
+
+                                            <?= $form->field($model, 'maintenance')->dropDownList([
+                                                'Kandang' => 'Kandang',
+                                                'Gembala' => 'Gembala',
+                                                'Campuran' => 'Campuran',
+                                            ], ['prompt' => 'Pilih jenis pemeliharaan']) ?>
+
+                                            </div>
+                                            <div class = "col">
+                                                <?= $form->field($model, 'vid')->textInput(['maxlength' => true, 'placeholder' => 'Masukkan kode VID']) ?>
+                                                <?= $form->field($model, 'ownership_status')->dropDownList([
+                                                    'Sendiri' => 'Sendiri',
+                                                    'Kelompok' => 'Kelompok',
+                                                    'Titipan' => 'Titipan',
+                                                ], ['prompt' => 'Pilih status kepemilikan']) ?>
+
+                                            <?= $form->field($model, 'reproduction')->dropDownList([
+                                                'Tidak Bunting' => 'Tidak Bunting',
+                                                'Bunting < 1 bulan' => 'Bunting < 1 bulan',
+                                                'Bunting 1 bulan' => 'Bunting 1 bulan',
+                                                'Bunting 2 bulan' => 'Bunting 2 bulan',
+                                                'Bunting 3 bulan' => 'Bunting 3 bulan',
+                                                'Bunting 4 bulan' => 'Bunting 4 bulan',
+                                                'Bunting 5 bulan' => 'Bunting 5 bulan',
+                                                'Bunting 6 bulan' => 'Bunting  bulan',
+                                                'Bunting 7 bulan' => 'Bunting 7 bulan',
+                                                'Bunting 8 bulan' => 'Bunting 8 bulan',
+                                                'Bunting 9 bulan' => 'Bunting 9 bulan',
+                                                'Bunting 10 bulan' => 'Bunting 10 bulan',
+                                                'Bunting 11 bulan' => 'Bunting 11 bulan',
+                                                'Bunting > 11 bulan' => 'Bunting > 11 bulan',
+                                            ], ['prompt' => 'Pilih status reproduksi']) ?>
+
+                                            <?= $form->field($model, 'gender')->dropDownList([
+                                                'Jantan' => 'Jantan',
+                                                'Betina' => 'Betina',
+                                            ], ['prompt' => 'Pilih jenis kelamin']) ?>
+
+                                            <?= $form->field($model, 'chest_size')->input('number', ['placeholder' => 'Masukkan ukuran dada (cm)']) ?>
+
+                                            <?= $form->field($model, 'body_weight')->input('number', ['placeholder' => 'Masukkan berat badan (kg)']) ?>
+
+                                            <?= $form->field($model, 'health')->dropDownList([
+                                                'Sehat' => 'Sehat',
+                                                'Sakit' => 'Sakit',
+                                            ], ['prompt' => 'Pilih status kesehatan']) ?>
+                                            <?= $form->field($model, 'source')->dropDownList([
+                                                'Sejak Lahir' => 'Sejak Lahir',
+                                                'Bantuan Pemerintah' => 'Bantuan Pemerintah',
+                                                'Beli' => 'Beli',
+                                                'Beli dari Luar Kelompok' => 'Beli dari Luar Kelompok',
+                                                'Beli dari Dalam Kelompok' => 'Beli dari Dalam Kelompok',
+                                                'Inseminasi Buatan' => 'Inseminasi Buatan',
+                                                'Kawin Alam' => 'Kawin Alam',
+                                                'Tidak Tahu' => 'Tidak Tahu',
+                                            ], ['prompt' => 'Pilih sumber hewan ternak']) ?>
+                                            </div>
+                                        </div>
+                                    </div>  
+
+        <div class="form-group">
+            <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+            <button type="submit" href= '<?= Url::toRoute(['/livestock/index']) ?>' class="btn btn-primary me-1">Cancel</button>
+        </div>
+
+
+        <?php ActiveForm::end(); ?>
+</div>

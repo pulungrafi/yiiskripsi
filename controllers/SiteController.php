@@ -117,10 +117,19 @@ class SiteController extends Controller
 
             $livestockCount = Livestock::find()->where(['user_id' => $userId])->count();
             $cageCount = Cage::find()->where(['user_id' => $userId])->count();
+            $userId = Yii::$app->user->identity->id;
+            $cages = Cage::find()
+                ->where(['user_id' => $userId])
+                ->all();
+            $livestocks = Livestock::find()
+                ->where(['user_id' => $userId])
+                ->all();
             
             return $this->render('index', [
                 'sapi' => $livestockCount,
                 'cage' => $cageCount,
+                'cages'=> $cages,
+                'livestocks'=> $livestocks,
             ]);
         }
     }

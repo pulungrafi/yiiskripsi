@@ -4,10 +4,8 @@ use yii\helpers\HtmlPurifier;
 
 /**
  * @var \yii\web\View $this
+ * @var app\models\Livestock $livestock
  */
-/* @var $cages app\models\Cage[] */
-/* @var $cages app\models\Livestock[] */
-
 
 $this->title = 'Dashboard';
 ?>
@@ -97,33 +95,49 @@ $this->title = 'Dashboard';
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-borderless mb-0">
-                                <?php if (!empty($livestocks)): ?>
-                                        <thead>
-                                            <tr>
-                                                <th>Kode Sapi</th>
-                                                <th>VID</th>
-                                                <th>Umur</th>
-                                                <th>Kesehatan</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php foreach ($livestocks as $livestock): ?>
-                                            <tr>
-                                                <td class="text-bold-500 post"><?= $livestock->name ?></td>
-                                                <td><?= $livestock->vid ?></td>
-                                                <td><?= $livestock->age ?></td>
-                                                <td><?= $livestock->health ?></td>
-                                                <!-- <td><div class="comment-actions">
-                                                    <button class="btn icon icon-left btn-primary me-2 text-nowrap"><i class="bi bi-eye-fill"></i> Show</button>
-                                                    <button class="btn icon icon-left btn-warning me-2 text-nowrap"><i class="bi bi-pencil-square"></i> Edit</button>
-                                                    <button class="btn icon icon-left btn-danger me-2 text-nowrap"><i class="bi bi-x-circle"></i> Remove</button>
-                                                </div></td> -->
-                                            </tr>
-                                            <?php endforeach; ?>
-                                        </tbody>
-                                    <?php else: ?>
-                                        <p>Anda belum memiliki sapi.</p>
-                                    <?php endif; ?>
+                                <?php if (!empty($livestocks)): ?> 
+                            <thead>
+                                <tr>
+                                    <th>VID</th>
+                                    <th>Nama</th>
+                                    <th>Kandang</th>
+                                    <th>Umur</th>
+                                    <th>Kesehatan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            <?php foreach ($livestocks as $livestock): ?>
+                                <tr>
+                                    <td class="text-bold-500"><?= $livestock->vid?></td>
+                                    <td class="text-bold-500"><?= $livestock->name ?></td>
+                                    <td class="text-bold-500"><?= $livestock->cage->name ?></td>
+                                    <td class="text-bold-500"><?= $livestock->age ?></td>
+                                    <td class="text-bold-500"><?= $livestock->health ?></td>
+                                </tr>
+                                <div class="modal fade" id="modalView<?= $livestock->id ?>" tabindex="-1" aria-labelledby="modalViewLabel<?= $livestock->id ?>" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="modalViewLabel<?= $livestock->id ?>">Detail Sapi</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                        <?php foreach ($livestock->attributes as $attribute => $value): ?>
+    <strong><?= ucfirst(str_replace('_', ' ', $attribute)) ?>:</strong> <?= $value ?><br>
+<?php endforeach; ?>
+
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                            <?php endforeach; ?>
+                            </tbody>
+                            <?php else: ?>
+                               <p>Anda belum memiliki Sapi.</p>
+                            <?php endif; ?>
                                 </table>
                             </div>
                         </div>

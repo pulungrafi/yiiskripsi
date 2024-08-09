@@ -86,10 +86,10 @@ JS) ?>
 							<a href="<?= Url::toRoute(['/cage/index']) ?>">Daftar Kandang</a>
 						</li>
 						<li class="submenu-item">
-							<a href="<?= Url::toRoute(['/site/create-sapi']) ?>">Daftar Sapi</a>
+							<a href="<?= Url::toRoute(['/livestock/index']) ?>">Daftar Sapi</a>
 						</li>
 						<li class="submenu-item">
-							<a href="<?= Url::toRoute(['/site/bcs']) ?>">Daftar BCS</a>
+							<a href="<?= Url::toRoute(['/bcs/index']) ?>">Daftar BCS</a>
 						</li>
 
 						<!-- <li class="submenu-item">

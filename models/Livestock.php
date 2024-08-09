@@ -34,7 +34,7 @@ class Livestock extends ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'birthdate', 'type_of_livestock', 'breed_of_livestock', 'purpose', 'maintenance', 'source', 'ownership_status', 'reproduction', 'gender', 'age', 'chest_size', 'body_weight', 'health'], 'required', 'message' => '{attribute} tidak boleh kosong.'],
+            [['name', 'birthdate', 'type_of_livestock', 'breed_of_livestock', 'purpose', 'maintenance', 'source', 'ownership_status', 'reproduction', 'gender', 'chest_size', 'body_weight', 'health'], 'required', 'message' => '{attribute} tidak boleh kosong.'],
             [['birthdate'], 'required', 'message' => 'Masukkan tanggal lahir ternak.'],
             [['user_id', 'cage_id', 'age'], 'integer'],
             ['name', 'validateLivestockName'],
@@ -205,6 +205,9 @@ class Livestock extends ActiveRecord
     public function beforeSave($insert)
     {
         if (parent::beforeSave($insert)) {
+            if (!empty($this->birthdate)) {
+                $this->age = $this->calculateAge($this->birthdate);
+            }
             if ($this->isNewRecord) {
                 // $this->eid = $this->generateEid();
                 $this->vid = $this->generateVid();
@@ -248,6 +251,9 @@ class Livestock extends ActiveRecord
 
     public function validateLivestockName($attribute, $params)
     {
+        if (!$this->isNewRecord && !$this->isAttributeChanged($attribute)) {
+            return;
+        }
         $userId = Yii::$app->user->identity->id;
         $existingLivestock = Livestock::find()
             ->where(['name' => $this->$attribute, 'user_id' => $userId])
@@ -285,6 +291,20 @@ class Livestock extends ActiveRecord
 
         return $result;
     }
+    private function calculateAge($birthdate)
+{
+    $birthDate = new \DateTime($birthdate);
+    $today = new \DateTime('today');
+    $age = $today->format('Y') - $birthDate->format('Y');
+
+    // Pastikan usia tidak negatif jika bulan atau hari belum terlewati tahun ini
+    if ($today->format('md') < $birthDate->format('md')) {
+        $age--;
+    }
+
+    return $age;
+}
+
 
     const SCENARIO_UPDATE = 'update';
 

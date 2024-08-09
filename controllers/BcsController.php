@@ -37,10 +37,6 @@ class BcsController extends BaseController
         $behaviors = parent::behaviors();
 
         // Menambahkan authenticator untuk otentikasi menggunakan access token
-        $behaviors['authenticator'] = [
-            'class' => HttpBearerAuth::class,
-            'except' => ['options'], 
-        ];
 
         // Menambahkan VerbFilter untuk memastikan setiap action hanya menerima HTTP method yang sesuai
         $behaviors['verbs'] = [
@@ -52,48 +48,92 @@ class BcsController extends BaseController
                 'view' => ['GET'],
                 'get-bcs-by-livestock-id' => ['GET'],
                 'upload-bcs' => ['POST'],
+                'index' => ['GET'],
             ],
         ];
 
         return $behaviors;
     }
-
-    public function actionCreate($livestock_id)
-    {
+    public function actionIndex(){
         $model = new BodyCountScore();
-        $model->livestock_id = $livestock_id;
+        return $this->render('index', [
+            'model'=> $model,
+        ]);
+    }
+
+    // public function actionCreate($livestock_id)
+    // {
+    //     $model = new BodyCountScore();
+    //     $model->livestock_id = $livestock_id;
     
-        if ($model->load(Yii::$app->request->post(), '') && $model->validate()) {
-            // Update the Livestock model
-            $livestock = Livestock::findOne($model->livestock_id);
-            if ($livestock) {
-                $model->save();
-                $livestock->body_weight = $model->body_weight;
-                $livestock->chest_size = $model->chest_size;
-                $livestock->save(false);
+    //     if ($model->load(Yii::$app->request->post(), '') && $model->validate()) {
+    //         // Update the Livestock model
+    //         $livestock = Livestock::findOne($model->livestock_id);
+    //         if ($livestock) {
+    //             $model->save();
+    //             $livestock->body_weight = $model->body_weight;
+    //             $livestock->chest_size = $model->chest_size;
+    //             $livestock->save(false);
     
-                Yii::$app->response->setStatusCode(201);
-                return [
-                    'message' => 'BCS berhasil dibuat.',
-                    'error' => false,
-                    'data' => $model,
-                ];
-            } else {
-                Yii::$app->response->setStatusCode(400);
-                return [
-                    'message' => 'Gagal membuat pembaruan BCS. Ternak tidak ditemukan',
-                    'error' => true,
-                ];
+    //             Yii::$app->response->setStatusCode(201);
+    //             return [
+    //                 'message' => 'BCS berhasil dibuat.',
+    //                 'error' => false,
+    //                 'data' => $model,
+    //             ];
+    //         } else {
+    //             Yii::$app->response->setStatusCode(400);
+    //             return [
+    //                 'message' => 'Gagal membuat pembaruan BCS. Ternak tidak ditemukan',
+    //                 'error' => true,
+    //             ];
+    //         }
+    //     } else {
+    //         Yii::$app->response->setStatusCode(400);
+    //         return [
+    //             'message' => 'Gagal membuat BCS. Data tidak valid.',
+    //             'error' => true,
+    //             'details' => $this->getValidationErrors($model),
+    //         ];
+    //     }
+    // }
+    public function actionCreate()
+{
+    $model = new BodyCountScore(); // Menggunakan model BCS
+
+    // Jika request adalah POST
+    if (Yii::$app->request->isPost) {
+        $requestData = Yii::$app->request->post();
+
+        // Cek apakah livestock_id ada di POST data
+        if (isset($requestData['BodyCountScore']['livestock_id'])) {
+            $livestockId = $requestData['BodyCountScore']['livestock_id'];
+
+            // Cari data ternak berdasarkan livestock_id
+            $livestock = Livestock::findOne($livestockId);
+
+            // Jika ternak ditemukan, ambil data body_weight dan chest_size
+            if ($livestock !== null) {
+                $model->body_weight = $livestock->body_weight;
+                $model->chest_size = $livestock->chest_size;
             }
-        } else {
-            Yii::$app->response->setStatusCode(400);
-            return [
-                'message' => 'Gagal membuat BCS. Data tidak valid.',
-                'error' => true,
-                'details' => $this->getValidationErrors($model),
-            ];
+        }
+
+        // Muat data POST ke dalam model BCS
+        $model->load($requestData);
+
+        // Simpan data jika validasi berhasil
+        if ($model->save()) {
+            Yii::$app->session->setFlash('success', 'Data BCS berhasil dibuat.');
+            return $this->redirect(['index']); // Redirect ke halaman index setelah berhasil
         }
     }
+
+    // Render form create
+    return $this->render('create', [
+        'model' => $model,
+    ]);
+}
 
     public function actionUpdate($id)
     {

@@ -61,8 +61,36 @@ class LivestockController extends SiteController
         return $behaviors;
     }
 
-    public function actionIndex(){
-        return $this ->render('index'); 
+    public function actionIndex()
+    {
+        $model = new Livestock();
+        $userId = Yii::$app->user->identity->id;
+        $cages = Cage::find()
+        ->where(['user_id' => $userId])
+        ->all();
+
+        // Get the list of cages based on user_id
+        $livestock = Livestock::find()
+            ->where(['user_id' => $userId])
+            ->all();
+        $model = new Livestock();
+        $requestData = Yii::$app->getRequest()->getBodyParams();
+        $model->load($requestData, '');
+
+        // Validasi cage_id berdasarkan user_id
+
+        if (empty($cages)) {
+            return $this->render('error', [
+                'message' => 'Kandang tidak boleh kosong, mohon buat kandang terlebih dahulu.',
+                'error' => true,
+            ]);
+        }else{
+            return $this-> render('index',[
+                'livestock' => $livestock,
+                'model' => $model,
+                'error' => false,
+            ]);
+        }
     }
     
     /**
@@ -70,51 +98,39 @@ class LivestockController extends SiteController
      * @return mixed
      * @throws ServerErrorHttpException jika data Livestock tidak dapat disimpan
      */
-    public function actionCreate()
-    {
+    public function actionCreate(){
         $model = new Livestock();
-        $requestData = Yii::$app->getRequest()->getBodyParams();
-        $model->load($requestData, '');
-
+        $model->user_id = Yii::$app->user->id;
+        $params = Yii::$app->request->post('Livestock', []);
+        $model->load(['Livestock' => $params]);
+        if (!$model->validate()) {
+            // Debug validation errors
+            var_dump($model->errors);
+            return $this->render('index', [
+                'model' => $model,
+            ]); 
+        }else{
+            $model->save();
+            return $this->redirect(['index']);
+        }
+        
         // Validasi cage_id berdasarkan user_id
-        $cageId = $model->cage_id;
-        $userId = Yii::$app->user->identity->id;
-
-        if ($cageId === null) {
-            Yii::$app->getResponse()->setStatusCode(400); // Bad Request
-            return [
-                'message' => 'Kandang tidak boleh kosong, mohon buat kandang terlebih dahulu.',
-                'error' => true,
-            ];
-        }
+        // $cageId = $model->cage_id;
+        // $userId = Yii::$app->user->identity->id;
+       
     
-        $existingCage = Cage::find()
-            ->where(['id' => $cageId, 'user_id' => $userId])
-            ->exists();
+        // $existingCage = Cage::find()
+        //     ->where(['id' => $cageId, 'user_id' => $userId])
+        //     ->exists();
     
-        if (!$existingCage) {
-            Yii::$app->getResponse()->setStatusCode(400); // Bad Request
-            return [
-                'message' => 'Kandang tidak ditemukan, mohon buat kandang sebelum menambahkan ternak.',
-                'error' => true,
-            ];
-        }
+        // if (!$existingCage) {
+        //     Yii::$app->getResponse()->setStatusCode(400); // Bad Request
+        //     return [
+        //         'message' => 'Kandang tidak ditemukan, mohon buat kandang sebelum menambahkan ternak.',
+        //         'error' => true,
+        //     ];
+        // }
 
-        if ($model->save()) {
-            Yii::$app->getResponse()->setStatusCode(201);
-            return $this -> render('create-sapi', [
-                'message' => 'Data ternak berhasil dibuat.',
-                'error' => false,
-                'data' => $model,
-            ]);
-        } else {
-            Yii::$app->getResponse()->setStatusCode(400);
-            return [
-                'message' => 'Gagal membuat data ternak.',
-                'error' => true,
-                'details' => $this->getValidationErrors($model),
-            ];
-        }
     }
 
     /**
@@ -126,36 +142,29 @@ class LivestockController extends SiteController
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
-        $model->scenario = Livestock::SCENARIO_UPDATE;
-        $model->load(Yii::$app->getRequest()->getBodyParams(), '');
+        $model = Livestock::findOne($id);
 
         // Check if the cage exists
-        $cageId = $model->cage_id;
-        $cageExists = Cage::findOne($cageId);
-        if (!$cageExists) {
-            Yii::$app->response->statusCode = 404;
-            return [
-                'message' => 'Kandang tidak ditemukan.',
-                'error' => true,
-            ];
+        if (!$model) {
+            Yii::$app->session->setFlash('error', 'Kandang tidak ditemukan.');
+            return $this->redirect(['index']);
         }
 
-        if ($model->save()) {
-            Yii::$app->response->statusCode = 200;
-            return [
-                'message' => 'Data ternak berhasil diperbarui.',
-                'error' => false,
-                'data' => $model,
-            ];
-        } else {
-            Yii::$app->response->statusCode = 400;
-            return [
-                'message' => 'Gagal memperbarui data ternak.',
-                'error' => true,
-                'details' => $this->getValidationErrors($model),
-            ];
+        // If the form is submitted
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            // Save the changes
+            if ($model->save()) {
+                Yii::$app->session->setFlash('success', 'Kandang berhasil diperbarui.');
+                return $this->redirect(['index']);
+            } else {
+                Yii::$app->session->setFlash('error', 'Gagal memperbarui data.');
+            }
         }
+
+        // Render the update view with the model data
+        return $this->render('update', [
+            'model' => $model,
+        ]);
     }
 
     /**
@@ -191,50 +200,50 @@ class LivestockController extends SiteController
      * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionDelete($id)
-    {
-        $transaction = Yii::$app->db->beginTransaction();
-        try {
-            // Get the livestock
-            $livestock = $this->findModel($id);
+{
+    $transaction = Yii::$app->db->beginTransaction();
+    try {
+        // Cari ternak berdasarkan ID
+        $livestock = $this->findModel($id);
 
-            // Check if the livestock exists
-            if ($livestock === null) {
-                Yii::$app->response->statusCode = 404;
-                return [
-                    'message' => 'Gagal menghapus data ternak. Data ternak tidak ditemukan.',
-                    'error' => true,
-                ];
-            }
-
-            // Get all notes for the livestock
-            $notes = Note::find()->where(['livestock_id' => $id])->all();
-
-            foreach ($notes as $note) {
-                // Delete the associated note images first
-                NoteImage::deleteAll(['note_id' => $note->id]);
-            }
-
-            // Then delete the notes
-            Note::deleteAll(['livestock_id' => $id]);
-
-            // Delete livestock images
-            LivestockImage::deleteAll(['livestock_id' => $id]);
-
-            // Then delete the livestock
-            $livestock->delete();
-
-            $transaction->commit();
-
-            Yii::$app->response->statusCode = 204;
-            return [
-                'message' => 'Data ternak berhasil dihapus.',
-                'error' => false,
-            ];
-        } catch (\Exception $e) {
-            $transaction->rollBack();
-            throw new ServerErrorHttpException('Gagal menghapus data ternak. Alasan: ' . $e->getMessage());
+        // Jika ternak tidak ditemukan, tampilkan pesan error
+        if ($livestock === null) {
+            Yii::$app->session->setFlash('error', 'Gagal menghapus data ternak. Data ternak tidak ditemukan.');
+            return $this->redirect(['index']);
         }
+
+        // Dapatkan semua catatan yang terkait dengan ternak
+        $notes = Note::find()->where(['livestock_id' => $id])->all();
+
+        foreach ($notes as $note) {
+            // Hapus gambar yang terkait dengan catatan terlebih dahulu
+            NoteImage::deleteAll(['note_id' => $note->id]);
+        }
+
+        // Hapus catatan
+        Note::deleteAll(['livestock_id' => $id]);
+
+        // Hapus gambar ternak
+        LivestockImage::deleteAll(['livestock_id' => $id]);
+
+        // Hapus ternak
+        $livestock->delete();
+
+        // Commit transaksi
+        $transaction->commit();
+
+        // Set flash message untuk sukses
+        Yii::$app->session->setFlash('success', 'Data ternak berhasil dihapus.');
+    } catch (\Exception $e) {
+        // Rollback transaksi jika terjadi kesalahan
+        $transaction->rollBack();
+        Yii::$app->session->setFlash('error', 'Gagal menghapus data ternak. Alasan: ' . $e->getMessage());
     }
+
+    // Redirect ke halaman index setelah operasi selesai
+    return $this->redirect(['index']);
+}
+
 
     /**
      * Mencari data Livestock berdasarkan VID.
