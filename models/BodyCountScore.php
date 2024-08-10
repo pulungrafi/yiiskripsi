@@ -90,4 +90,13 @@ class BodyCountScore extends ActiveRecord
     {
         return $this->hasMany(BcsImage::class, ['bcs_id' => 'id']);
     }
+    public function getLivestock()
+    {
+        return $this->hasOne(Livestock::class, ['id' => 'livestock_id']);
+    }
+    public function getUserId()
+    {
+        return $this->livestock ? $this->livestock->user_id : null;
+    }
+
 }

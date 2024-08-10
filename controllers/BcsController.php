@@ -12,7 +12,7 @@ use yii\helpers\FileHelper;
 use app\models\BcsImage;
 use Google\Cloud\Storage\StorageClient;
 
-class BcsController extends BaseController
+class BcsController extends SiteController
 {
     public $modelClass = 'app\models\BodyCountScore';
 
@@ -54,12 +54,21 @@ class BcsController extends BaseController
 
         return $behaviors;
     }
-    public function actionIndex(){
-        $model = new BodyCountScore();
-        return $this->render('index', [
-            'model'=> $model,
-        ]);
-    }
+    public function actionIndex()
+{
+    $userId = Yii::$app->user->identity->id;
+    $bcs = BodyCountScore::find()
+        ->joinWith('livestock')  // Join dengan tabel livestock
+        ->where(['livestock.user_id' => $userId])
+        ->all();
+
+    return $this->render('index', [
+        'bcs' => $bcs,
+        'model' => new BodyCountScore(),
+    ]);
+}
+
+
 
     // public function actionCreate($livestock_id)
     // {
@@ -135,71 +144,75 @@ class BcsController extends BaseController
     ]);
 }
 
-    public function actionUpdate($id)
-    {
-        $model = BodyCountScore::findOne($id);
-        if ($model) {
-            if ($model->load(Yii::$app->request->post(), '') && $model->validate()) {
-                // Update the Livestock model
-                $livestock = Livestock::findOne($model->livestock_id);
-                if ($livestock) {
-                    $model->save();
-                    $livestock->body_weight = $model->body_weight;
-                    $livestock->chest_size = $model->chest_size;
-                    $livestock->save(false);
+public function actionUpdate($id)
+{
+    $model = BodyCountScore::findOne($id);
 
-                    Yii::$app->response->setStatusCode(200);
-                    return [
-                        'message' => 'BCS berhasil diperbarui.',
-                        'error' => false,
-                        'data' => $model,
-                    ];
-                } else {
-                    Yii::$app->response->setStatusCode(400);
-                    return [
-                        'message' => 'Gagal memperbarui BCS. Ternak tidak ditemukan',
-                        'error' => true,
-                    ];
-                }
+    // Check if the cage exists
+    if (!$model) {
+        Yii::$app->session->setFlash('error', 'Kandang tidak ditemukan.');
+        return $this->redirect(['index']);
+    }
+
+    // If the form is submitted
+    if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+        // Save the changes
+        if ($model->save()) {
+            Yii::$app->session->setFlash('success', 'Kandang berhasil diperbarui.');
+            return $this->redirect(['index']);
+        } else {
+            Yii::$app->session->setFlash('error', 'Gagal memperbarui data.');
+        }
+    }
+
+    // Render the update view with the model data
+    return $this->render('update', [
+        'model' => $model,
+    ]);
+}
+
+
+    public function actionDelete($id)
+{
+    Yii::$app->response->format = \yii\web\Response::FORMAT_JSON; // Set response format to JSON
+
+    // Mulai transaksi untuk menjaga konsistensi data
+    $transaction = Yii::$app->db->beginTransaction();
+
+    try {
+        $model = BodyCountScore::findOne($id);
+
+        if ($model !== null) {
+            // Hapus model dan komit transaksi
+            if ($model->delete() !== false) {
+                $transaction->commit();
+                return $this->redirect(['index']);
             } else {
-                Yii::$app->response->setStatusCode(400);
+                // Rollback jika penghapusan gagal
+                $transaction->rollBack();
                 return [
-                    'message' => 'Gagal memperbarui BCS. Data tidak valid.',
+                    'message' => 'Gagal menghapus data BCS.',
                     'error' => true,
-                    'details' => $this->getValidationErrors($model),
                 ];
             }
         } else {
-            Yii::$app->response->setStatusCode(400);
+            // Jika model tidak ditemukan, rollback dan kembalikan pesan error
+            $transaction->rollBack();
             return [
-                'message' => 'Gagal memperbarui BCS, data tidak ditemukan.',
-                'error' => true,
-            ];
-        }
-    }
-
-    public function actionDelete($id)
-    {
-        $model = BodyCountScore::findOne($id);
-        if ($model) {
-            $model->delete();
-            $response = Yii::$app->response;
-            $response->setStatusCode(204);
-            $response->data = [
-                'message' => 'Data BCS berhasil dihapus.',
-                'error' => false,
-            ];
-            return $response;
-        } else {
-            $response = Yii::$app->response;
-            $response->setStatusCode(404);
-            $response->data = [
                 'message' => 'Gagal menghapus data BCS, data tidak ditemukan.',
                 'error' => true,
             ];
-            return $response;
         }
+    } catch (\Exception $e) {
+        // Jika terjadi exception, rollback transaksi dan kembalikan pesan error
+        $transaction->rollBack();
+        return $this->render('error', [
+            'message' => 'Gagal menghapus data BCS. Alasan: ' . $e->getMessage(),
+            'error' => true,
+        ]);
     }
+}
+
 
     public function actionView($id)
     {

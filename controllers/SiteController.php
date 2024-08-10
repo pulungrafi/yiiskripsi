@@ -75,11 +75,6 @@ class SiteController extends Controller
         }
 
         // CEK PENGGUNAA DISINI HARUS TIDAK GUEST
-        if (Yii::$app->user->isGuest) {
-           return Url::to(array('bcs'));
-
-        }
-        
 
         return true;
     }
@@ -117,7 +112,6 @@ class SiteController extends Controller
 
             $livestockCount = Livestock::find()->where(['user_id' => $userId])->count();
             $cageCount = Cage::find()->where(['user_id' => $userId])->count();
-            $userId = Yii::$app->user->identity->id;
             $cages = Cage::find()
                 ->where(['user_id' => $userId])
                 ->all();

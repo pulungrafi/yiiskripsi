@@ -14,8 +14,11 @@ use app\models\Cage;
 use yii\web\UploadedFile;
 use yii\helpers\FileHelper;
 use Google\Cloud\Storage\StorageClient;
+use yii\helpers\Url;
+use app\models\LoginForm;
 
-class NoteController extends BaseController
+
+class NoteController extends SiteController
 {
     public $modelClass = 'app\models\Note';
 
@@ -39,11 +42,6 @@ class NoteController extends BaseController
     {
         $behaviors = parent::behaviors();
 
-        // Menambahkan authenticator untuk otentikasi menggunakan access token
-        $behaviors['authenticator'] = [
-            'class' => HttpBearerAuth::class,
-            'except' => ['options'], 
-        ];
 
         // Menambahkan VerbFilter untuk memastikan setiap action hanya menerima HTTP method yang sesuai
         $behaviors['verbs'] = [
@@ -255,23 +253,35 @@ class NoteController extends BaseController
      */
     public function actionIndex()
     {
-        $notes = Note::find()->where(['user_id' => Yii::$app->user->id])->all();
-
-        if (!empty($notes)) {
-            Yii::$app->response->statusCode = 200;
-            return [
-                'message' => 'Berhasil menemukan catatan.',
-                'error' => false,
-                'data' => $notes,
-            ];
-        } else {
-            Yii::$app->response->statusCode = 404;
-            return [
-                'message' => 'Catatan tidak ditemukan.',
-                'error' => true,
-            ];
+        
+        if (Yii::$app->user->isGuest) {
+            $redirect = Url::to(['user/index']);
+            $model = new LoginForm();
+            return $this-> render($redirect , ['model'=> $model]);
+ 
         }
-    }
+        else{$model = new Note();
+        $notes = Note::find()->where(['user_id' => Yii::$app->user->id])->all();
+        return $this->render('index', [
+            'notes'=> $notes,
+            'model'=> $model,
+            ]);
+
+        // if (!empty($notes)) {
+        //     Yii::$app->response->statusCode = 200;
+        //     return [
+        //         'message' => 'Berhasil menemukan catatan.',
+        //         'error' => false,
+        //         'data' => $notes,
+        //     ];
+        // } else {
+        //     Yii::$app->response->statusCode = 404;
+        //     return [
+        //         'message' => 'Catatan tidak ditemukan.',
+        //         'error' => true,
+        //     ];
+        // }
+    }}
 
     /**
      * Get note data by livestock_id.
@@ -306,82 +316,82 @@ class NoteController extends BaseController
      * @throws BadRequestHttpException jika tidak ada dokumentasi yang diunggah
      * @throws ServerErrorHttpException jika data Note tidak dapat disimpan
      */
-    public function actionUploadDocumentation($id)
-    {
-        // Temukan model Note berdasarkan ID
-        $model = $this->findModel($id);
+    // public function actionUploadDocumentation($id)
+    // {
+    //     // Temukan model Note berdasarkan ID
+    //     $model = $this->findModel($id);
 
-        // Ambil gambar dari request
-        $imageFiles = UploadedFile::getInstancesByName('documentation');
+    //     // Ambil gambar dari request
+    //     $imageFiles = UploadedFile::getInstancesByName('documentation');
 
-        if (!empty($imageFiles)) {
-            // Ambil user_id dari pengguna yang sedang login
-            $userId = Yii::$app->user->identity->id;
+    //     if (!empty($imageFiles)) {
+    //         // Ambil user_id dari pengguna yang sedang login
+    //         $userId = Yii::$app->user->identity->id;
 
-            // Buat path direktori berdasarkan user_id dan id Note
-            $uploadPath = 'notes/' . $userId . '/' . $model->livestock_id . '/' . $model->id . '/';
+    //         // Buat path direktori berdasarkan user_id dan id Note
+    //         $uploadPath = 'notes/' . $userId . '/' . $model->livestock_id . '/' . $model->id . '/';
 
-            // Periksa apakah direktori sudah ada, jika tidak, buat direktori baru
-            if (!is_dir($uploadPath)) {
-                FileHelper::createDirectory($uploadPath);
-            }
+    //         // Periksa apakah direktori sudah ada, jika tidak, buat direktori baru
+    //         if (!is_dir($uploadPath)) {
+    //             FileHelper::createDirectory($uploadPath);
+    //         }
 
-            $uploadedImages = [];
+    //         $uploadedImages = [];
 
-            // Initialize the Google Cloud Storage client
-            $storage = new StorageClient([
-                'keyFilePath' => Yii::getAlias('@app/config/sa.json')
-            ]);
-            $bucket = $storage->bucket('digiternak1');
+    //         // Initialize the Google Cloud Storage client
+    //         $storage = new StorageClient([
+    //             'keyFilePath' => Yii::getAlias('@app/config/sa.json')
+    //         ]);
+    //         $bucket = $storage->bucket('digiternak1');
 
-            // Iterate through each uploaded file
-            foreach ($imageFiles as $index => $imageFile) {
-                // Generate a unique file name
-                $imageName = Yii::$app->security->generateRandomString(12) . $index . '.' . $imageFile->getExtension();
+    //         // Iterate through each uploaded file
+    //         foreach ($imageFiles as $index => $imageFile) {
+    //             // Generate a unique file name
+    //             $imageName = Yii::$app->security->generateRandomString(12) . $index . '.' . $imageFile->getExtension();
             
-                // Save the file to the directory
-                $object = $bucket->upload(
-                    file_get_contents($imageFile->tempName),
-                    ['name' => $uploadPath . $imageName]
-                );
+    //             // Save the file to the directory
+    //             $object = $bucket->upload(
+    //                 file_get_contents($imageFile->tempName),
+    //                 ['name' => $uploadPath . $imageName]
+    //             );
 
-                // Make the object publicly accessible
-                $object->update(['acl' => []], ['predefinedAcl' => 'publicRead']);
+    //             // Make the object publicly accessible
+    //             $object->update(['acl' => []], ['predefinedAcl' => 'publicRead']);
             
-                // Get the public URL of the object
-                $publicUrl = sprintf('https://storage.googleapis.com/%s/%s', $bucket->name(), $uploadPath . $imageName);
+    //             // Get the public URL of the object
+    //             $publicUrl = sprintf('https://storage.googleapis.com/%s/%s', $bucket->name(), $uploadPath . $imageName);
 
-                // Save the image information to the note_images table
-                $noteImage = new NoteImage();
-                $noteImage->note_id = $model->id;
-                $noteImage->image_path = $uploadPath . $imageName;
-                if (!$noteImage->save()) {
-                    Yii::$app->response->statusCode = 400;
-                    return [
-                        'message' => 'Gagal menyimpan data gambar ke database.',
-                        'error' => true,
-                    ];
-                }
+    //             // Save the image information to the note_images table
+    //             $noteImage = new NoteImage();
+    //             $noteImage->note_id = $model->id;
+    //             $noteImage->image_path = $uploadPath . $imageName;
+    //             if (!$noteImage->save()) {
+    //                 Yii::$app->response->statusCode = 400;
+    //                 return [
+    //                     'message' => 'Gagal menyimpan data gambar ke database.',
+    //                     'error' => true,
+    //                 ];
+    //             }
             
-                // Save the public URL to the array
-                $uploadedImages[] = $publicUrl;
-            }
+    //             // Save the public URL to the array
+    //             $uploadedImages[] = $publicUrl;
+    //         }
 
-            // If the model saving is successful
-            Yii::$app->response->statusCode = 201;
-            return [
-                'message' => 'Gambar berhasil diunggah.',
-                'error' => false,
-                'data' => [
-                    'livestock_images' => $uploadedImages,
-                ],
-            ];
-        } else {
-            Yii::$app->response->statusCode = 400;
-            return [
-                'message' => 'Tidak ada gambar yang diunggah.',
-                'error' => true,
-            ];
-        }
-    }
+    //         // If the model saving is successful
+    //         Yii::$app->response->statusCode = 201;
+    //         return [
+    //             'message' => 'Gambar berhasil diunggah.',
+    //             'error' => false,
+    //             'data' => [
+    //                 'livestock_images' => $uploadedImages,
+    //             ],
+    //         ];
+    //     } else {
+    //         Yii::$app->response->statusCode = 400;
+    //         return [
+    //             'message' => 'Tidak ada gambar yang diunggah.',
+    //             'error' => true,
+    //         ];
+    //     }
+    // }
 }

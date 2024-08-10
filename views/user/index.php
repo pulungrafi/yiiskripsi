@@ -52,11 +52,6 @@ $themeMazer = MainAsset::register($this);
                         SignUp
                     </a>.
                 </p>
-                <p>
-                    <a class="font-bold" href="<?= Url::toRoute(['forgot-password']) ?>">
-                        Forgot password
-                    </a>
-                </p>
             </div>
         </div>
     </div>

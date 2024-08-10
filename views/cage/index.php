@@ -97,9 +97,9 @@ use yii\helpers\Url;
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
                                                         <div class="modal-body">
-                                                            <strong>Nama Kandang:</strong> <?= $cage->name ?><br>
-                                                            <strong>Lokasi:</strong> <?= $cage->location ?><br>
-                                                            <strong>Deskripsi:</strong> <?= $cage->description ?>
+                                                        <?php foreach ($cage->attributes as $attribute => $value): ?>
+                                                            <strong><?= ucfirst(str_replace('_', ' ', $attribute)) ?>:</strong> <?= $value ?><br>
+                                                        <?php endforeach; ?>
                                                         </div>
                                                         <div class="modal-footer">
                                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

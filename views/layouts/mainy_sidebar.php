@@ -70,7 +70,7 @@ JS) ?>
 				</li>
 				
 				<li class="sidebar-item">
-					<a href="<?= Url::toRoute(['/site/notes']) ?>" class="sidebar-link">
+					<a href="<?= Url::toRoute(['/note/index']) ?>" class="sidebar-link">
 						<i class="bi bi-clipboard"></i>
 						<span>Buat Catatan Ternak</span>
 					</a>

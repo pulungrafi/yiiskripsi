@@ -123,8 +123,8 @@ $this->title = 'Dashboard';
                                                         </div>
                                                         <div class="modal-body">
                                                         <?php foreach ($livestock->attributes as $attribute => $value): ?>
-    <strong><?= ucfirst(str_replace('_', ' ', $attribute)) ?>:</strong> <?= $value ?><br>
-<?php endforeach; ?>
+                                                            <strong><?= ucfirst(str_replace('_', ' ', $attribute)) ?>:</strong> <?= $value ?><br>
+                                                        <?php endforeach; ?>
 
                                                         </div>
                                                         <div class="modal-footer">

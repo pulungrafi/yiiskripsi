@@ -55,6 +55,6 @@ class RegisterForm extends Model
         $user->status = User::STATUS_ACTIVE;
         $user->verification_token = $this->verification_token;
 
-        return $user->save() ? Yii::$app->user->login($user, $this->rememberMe ? 3600 * 24 * 30 : 0) : null;
+        return $user->save();
     }
 }

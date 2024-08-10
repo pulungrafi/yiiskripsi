@@ -186,9 +186,8 @@ $this->title = 'Daftar Sapi';
                                                         </div>
                                                         <div class="modal-body">
                                                         <?php foreach ($livestock->attributes as $attribute => $value): ?>
-    <strong><?= ucfirst(str_replace('_', ' ', $attribute)) ?>:</strong> <?= $value ?><br>
-<?php endforeach; ?>
-
+                                                            <strong><?= ucfirst(str_replace('_', ' ', $attribute)) ?>:</strong> <?= $value ?><br>
+                                                        <?php endforeach; ?>
                                                         </div>
                                                         <div class="modal-footer">
                                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
