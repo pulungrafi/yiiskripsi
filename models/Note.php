@@ -34,7 +34,7 @@ class Note extends ActiveRecord
     {
         return [
             [['livestock_feed', 'costs', 'feed_weight'], 'required', 'message' => '{attribute} tidak boleh kosong.'],
-            ['costs', 'validateCosts'],
+            [['costs'], 'required'],
             [['livestock_name', 'livestock_id', 'livestock_vid', 'livestock_cage', 'location', 'created_at', 'updated_at'], 'safe'],
             [['costs', 'feed_weight'], 'number', 'min' => 0, 'message' => '{attribute} harus berupa angka positif.'],
             [['location', 'livestock_feed', 'vitamin'], 'match', 'pattern' => '/^[A-Za-z0-9\s]{3,255}$/', 'message' => '{attribute} harus terdiri dari 3 sampai 255 karakter dan hanya boleh berisi huruf, angka, dan spasi.'],

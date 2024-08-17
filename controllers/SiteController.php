@@ -160,23 +160,9 @@ class SiteController extends Controller
 
         return $this->goHome();
     }
-
-    /**
-     * Displays contact page.
-     *
-     * @return Response|string
-     */
-    public function actionContact()
+    public function actionProfile()
     {
-        $model = new ContactForm();
-        if ($model->load(Yii::$app->request->post()) && $model->contact(Yii::$app->params['adminEmail'])) {
-            Yii::$app->session->setFlash('contactFormSubmitted');
-
-            return $this->refresh();
-        }
-        return $this->render('contact', [
-            'model' => $model,
-        ]);
+        return $this->render('profile');
     }
 
     /**
@@ -270,39 +256,6 @@ class SiteController extends Controller
     }
     
     public function actionBcs(){
-        // $model = new BodyCountScore();
-        // $model->livestock_id = $livestock_id;
-    
-        // if ($model->load(Yii::$app->request->post(), '') && $model->validate()) {
-        //     // Update the Livestock model
-        //     $livestock = Livestock::findOne($model->livestock_id);
-        //     if ($livestock) {
-        //         $model->save();
-        //         $livestock->body_weight = $model->body_weight;
-        //         $livestock->chest_size = $model->chest_size;
-        //         $livestock->save(false);
-    
-        //         Yii::$app->response->setStatusCode(201);
-        //         return $this -> render('bcs', [
-        //             'message' => 'BCS berhasil dibuat.',
-        //             'error' => false,
-        //             'data' => $model,
-        //         ]);
-        //     } else {
-        //         Yii::$app->response->setStatusCode(400);
-        //         return [
-        //             'message' => 'Gagal membuat pembaruan BCS. Ternak tidak ditemukan',
-        //             'error' => true,
-        //         ];
-        //     }
-        // } else {
-        //     Yii::$app->response->setStatusCode(400);
-        //     return [
-        //         'message' => 'Gagal membuat BCS. Data tidak valid.',
-        //         'error' => true,
-        //         'details' => $this->getValidationErrors($model),
-        //     ];
-        // }
         $bcs = new BodyCountScore();
         $bcs->livestock_id = 2;
         //$bcs->user_id = Yii::$app->user->id;

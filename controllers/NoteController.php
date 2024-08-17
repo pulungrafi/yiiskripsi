@@ -100,59 +100,72 @@ class NoteController extends SiteController
      * @throws BadRequestHttpException jika input tidak valid
      * @throws ServerErrorHttpException jika data Note tidak dapat disimpan
      */
-    public function actionCreate($livestock_id)
-    {
-        $model = new Note();
+    public function actionCreate()
+{
+    $model = new Note();
 
-        // Find the livestock using the provided livestock_id
-        $livestock = Livestock::findOne($livestock_id);
+    // Ambil livestock_id dari input POST
+    $livestock_id = Yii::$app->request->post('Note')['livestock_id'];
 
-        if (!$livestock) {
-            Yii::$app->response->statusCode = 400;
-            return [
-                'message' => 'Gagal membuat catatan, data ternak tidak ditemukan.',
-                'error' => true,
-            ];
-        }
-
-        // Find the cage associated with the livestock
-        $cage = Cage::findOne($livestock->cage_id);
-
-        if (!$cage) {
-            Yii::$app->response->statusCode = 400;
-            return [
-                'message' => 'Gagal membuat catatan, kandang tidak ditemukan.',
-                'error' => true,
-            ];
-        }
-
-        // Set the attributes of the Note
-        $model->livestock_id = $livestock->id;
-        $model->livestock_vid = $livestock->vid;
-        $model->livestock_name = $livestock->name;
-        $model->livestock_cage = $cage->name;
-        $model->location = $cage->location;
-        
-        // Load the data from the request body
-        if ($model->load(Yii::$app->getRequest()->getBodyParams(), '') && $model->validate()) {
-            // Save the model
-            if ($model->save()) {
-                Yii::$app->getResponse()->setStatusCode(201);
-                return [
-                    'message' => 'Catatan berhasil dibuat.',
-                    'error' => false,
-                    'data' => $model,
-                ];
-            } 
-        } else {
-            Yii::$app->response->statusCode = 400;
-            return [
-                'message' => 'Catatan gagal dibuat.',
-                'error' => true,
-                'details' => $this->getValidationErrors($model),
-            ];
-        }
+    // Validasi apakah livestock_id ada
+    if (!$livestock_id) {
+        Yii::$app->response->statusCode = 400;
+        return $this->render('error', [
+            'message' => 'Gagal membuat catatan, livestock_id tidak ditemukan.',
+            'error' => true,
+        ]);
     }
+
+    // Cari ternak berdasarkan livestock_id
+    $livestock = Livestock::findOne($livestock_id);
+
+    if (!$livestock) {
+        Yii::$app->response->statusCode = 400;
+        return $this->render('error', [
+            'message' => 'Gagal membuat catatan, data ternak tidak ditemukan.',
+            'error' => true,
+        ]);
+    }
+
+    // Cari kandang yang terkait dengan ternak
+    $cage = Cage::findOne($livestock->cage_id);
+
+    if (!$cage) {
+        Yii::$app->response->statusCode = 400;
+        return $this->render('error', [
+            'message' => 'Gagal membuat catatan, kandang tidak ditemukan.',
+            'error' => true,
+        ]);
+    }
+
+    // Set atribut-atribut dari Note
+    $model->livestock_id = $livestock->id;
+    $model->livestock_vid = $livestock->vid;
+    $model->livestock_name = $livestock->name;
+    $model->livestock_cage = $cage->name;
+    $model->location = $cage->location;
+
+    // Muat data dari input POST
+    if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+        // Simpan model
+        if ($model->save()) {
+            // Set flash message untuk sukses
+            Yii::$app->session->setFlash('success', 'Catatan berhasil dibuat.');
+    
+            // Redirect ke halaman index
+            return $this->redirect(['index']);
+        }
+    } else {
+        Yii::$app->response->statusCode = 400;
+        return $this->render('error', [
+            'message' => 'Catatan gagal dibuat.',
+            'error' => true,
+            'details' => $this->getValidationErrors($model),
+        ]);
+    }
+}
+
+
 
     /**
      * Mengupdate data Note berdasarkan ID.
@@ -163,44 +176,26 @@ class NoteController extends SiteController
      * @throws ServerErrorHttpException jika data Note tidak dapat disimpan
      */
     public function actionUpdate($id)
-    {
-        $model = $this->findModel($id);
+{
+    $model = $this->findModel($id);
 
-        if ($model === null) {
-            Yii::$app->getResponse()->setStatusCode(404);
-            return [
-                'message' => 'Catatan tidak ditemukan.',
-                'error' => true,
-            ];
-        }
-
-        // Load the data from the request body
-        $data = Yii::$app->getRequest()->getBodyParams();
-
-        // Only allow updating of livestock_feed, costs, and details
-        $model->livestock_feed = $data['livestock_feed'] ?? $model->livestock_feed;
-        $model->feed_weight = $data['feed_weight'] ?? $model->feed_weight;
-        $model->vitamin = $data['vitamin'] ?? $model->vitamin;
-        $model->costs = $data['costs'] ?? $model->costs;
-        $model->details = $data['details'] ?? $model->details;
-
-        // Save the model
-        if ($model->validate() && $model->save()) {
-            Yii::$app->getResponse()->setStatusCode(200);
-            return [
-                'message' => 'Catatan berhasil diperbarui.',
-                'error' => false,
-                'data' => $model,
-            ];
-        } else {
-            Yii::$app->getResponse()->setStatusCode(400);
-            return [
-                'message' => 'Gagal memperbarui catatan.',
-                'error' => true,
-                'details' => $this->getValidationErrors($model),
-            ];
-        }
+    if ($model === null) {
+        Yii::$app->session->setFlash('error', 'Catatan tidak ditemukan.');
+        return $this->redirect(['index']);
     }
+
+    if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+        $model->save();
+        Yii::$app->session->setFlash('success', 'Catatan berhasil diperbarui.');
+        return $this->redirect('index'); // Assuming you have a view page for notes
+    } else {
+        Yii::$app->session->setFlash('error', 'Gagal memperbarui catatan.');
+        return $this->render('update', [
+            'model' => $model,
+        ]);
+    }
+}
+
 
     /**
      * Deletes a Note model based on its primary key value.
@@ -210,42 +205,34 @@ class NoteController extends SiteController
      * @throws ServerErrorHttpException if the model cannot be deleted
      */
     public function actionDelete($id)
-    {
-        $transaction = Yii::$app->db->beginTransaction();
-        try {
-            $model = $this->findModel($id);
+{
+    $transaction = Yii::$app->db->beginTransaction();
+    try {
+        $model = $this->findModel($id);
 
-            if ($model === null) {
-                Yii::$app->response->statusCode = 404;
-                return [
-                    'message' => 'Gagal menghapus catatan, catatan tidak ditemukan.',
-                    'error' => true,
-                ];
-            }
-
-            // Delete note images first
-            NoteImage::deleteAll(['note_id' => $id]);
-
-            // Then delete the note
-            $model->delete();
-
-            $transaction->commit();
-
-            Yii::$app->response->statusCode = 204;
-            return [
-                'message' => 'Catatan berhasil dihapus.',
-                'error' => false,
-            ];
-        } catch (\Exception $e) {
-            $transaction->rollBack();
-
-            Yii::$app->response->statusCode = 500;
-            return [
-                'message' => 'Gagal menghapus catatan : ' . $e->getMessage(),
-                'error' => true,
-            ];
+        if ($model === null) {
+            Yii::$app->session->setFlash('error', 'Gagal menghapus catatan, catatan tidak ditemukan.');
+            return $this->redirect(['index']);
         }
+
+        // Delete note images first
+        NoteImage::deleteAll(['note_id' => $id]);
+
+        // Then delete the note
+        $model->delete();
+
+        $transaction->commit();
+
+        Yii::$app->session->setFlash('success', 'Catatan berhasil dihapus.');
+        return $this->redirect(['index']);
+    } catch (\Exception $e) {
+        $transaction->rollBack();
+
+        Yii::$app->session->setFlash('error', 'Gagal menghapus catatan: ' . $e->getMessage());
+        return $this->redirect(['index']);
     }
+}
+
 
     /**
      * Returns all notes created by the current user.
@@ -260,27 +247,13 @@ class NoteController extends SiteController
             return $this-> render($redirect , ['model'=> $model]);
  
         }
-        else{$model = new Note();
-        $notes = Note::find()->where(['user_id' => Yii::$app->user->id])->all();
-        return $this->render('index', [
-            'notes'=> $notes,
-            'model'=> $model,
-            ]);
-
-        // if (!empty($notes)) {
-        //     Yii::$app->response->statusCode = 200;
-        //     return [
-        //         'message' => 'Berhasil menemukan catatan.',
-        //         'error' => false,
-        //         'data' => $notes,
-        //     ];
-        // } else {
-        //     Yii::$app->response->statusCode = 404;
-        //     return [
-        //         'message' => 'Catatan tidak ditemukan.',
-        //         'error' => true,
-        //     ];
-        // }
+        else{
+            $model = new Note();
+            $notes = Note::find()->where(['user_id' => Yii::$app->user->id])->all();
+            return $this->render('index', [
+                'notes'=> $notes,
+                'model'=> $model,
+                ]);
     }}
 
     /**
@@ -288,25 +261,28 @@ class NoteController extends SiteController
      * @param integer $livestock_id
      * @return mixed
      */
-    public function actionGetNoteByLivestockId($livestock_id)
-    {
+    public function actionGetNoteByLivestockId()
+{
+    $livestock_id = Yii::$app->request->get('livestock_id'); // Retrieve the livestock_id from the GET request
+
+    if ($livestock_id) {
         $notes = Note::find()->where(['livestock_id' => $livestock_id])->all();
 
         if (!empty($notes)) {
-            Yii::$app->response->statusCode = 200;
-            return [
-                'message' => 'Catatan berhasil ditemukan.',
-                'error' => false,
-                'data' => $notes,
-            ];
+            return $this->render('index', [
+                'notes' => $notes,
+                'livestock_id' => $livestock_id,
+            ]);
         } else {
-            Yii::$app->response->statusCode = 404;
-            return [
-                'message' => 'Catatan tidak ditemukan.',
-                'error' => true,
-            ];
+            Yii::$app->session->setFlash('error', 'Catatan tidak ditemukan.');
+            return $this->redirect(['index']);
         }
+    } else {
+        Yii::$app->session->setFlash('error', 'Livestock ID tidak valid.');
+        return $this->redirect(['index']);
     }
+}
+
 
     /**
      * Mengunggah dokumentasi ke dalam catatan.

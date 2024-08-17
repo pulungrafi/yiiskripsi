@@ -38,7 +38,7 @@ class Livestock extends ActiveRecord
             [['birthdate'], 'required', 'message' => 'Masukkan tanggal lahir ternak.'],
             [['user_id', 'cage_id', 'age'], 'integer'],
             ['name', 'validateLivestockName'],
-            [['chest_size', 'body_weight'], 'number'],
+            [['body_weight', 'chest_size'], 'number', 'min' => 0, 'tooSmall' => '{attribute} harus bernilai positif.', 'message' => '{attribute} harus berupa angka.', 'skipOnEmpty' => true],
             ['name', 'string', 'max' => 255],
             [['livestock_image'], 'string'],
             [['eid', 'vid'], 'unique', 'message' => '{attribute} sudah digunakan oleh ternak lain.'],

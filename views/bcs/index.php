@@ -16,7 +16,7 @@ use yii\helpers\Url;
 
 <div class="page-content"> 
     <section class="row">
-        <div class="col-12 col-lg-7">
+        <div class="col-12 col-lg-5">
             <section class="section">
                 <div class="card">
                     <div class="card-content">
@@ -48,7 +48,7 @@ use yii\helpers\Url;
             </section>
         </div>
 
-        <div class="col-12 col-lg-5">
+        <div class="col-12 col-lg-7">
             <div class="card">
                 <div class="card-header">
                     <h4>Log BCS</h4>

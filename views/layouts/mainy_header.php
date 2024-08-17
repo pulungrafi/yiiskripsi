@@ -83,15 +83,11 @@ $themeMazer = MainAsset::register($this);
 
 					<ul class="dropdown-menu dropdown-menu-end shadow-lg" aria-labelledby="dropdownMenuButton" style="min-width: 11rem;">
 						<li>
-							<a class="dropdown-item" href="#">
+							<a class="dropdown-item" href="<?= Url::toRoute(['/user/profile']) ?>">
 								<i class="icon-mid bi bi-person me-2"></i> My Profile
 							</a>
 						</li>
-						<li>
-							<a class="dropdown-item" href="#">
-								<i class="icon-mid bi bi-gear me-2"></i> Change Password
-							</a>
-						</li>
+		
 						<li>
 							<hr class="dropdown-divider">
 						</li>

@@ -76,7 +76,7 @@ class UserController extends SiteController
                 'logout' => ['POST'],
                 'verify-email' => ['GET'],
                 'request-password-reset' => ['POST'],
-                'profile' => ['GET'],
+                'profile' => ['GET' , 'POST'],
                 'edit-profile' => ['PUT'],
             ],
         ];
@@ -107,6 +107,7 @@ class UserController extends SiteController
      */
     public function actionRegister()
     {
+    $this->layout = 'auth';
     $model = new RegisterForm();
     $params = Yii::$app->request->post('RegisterForm', []);
     $model->load(['RegisterForm' => $params]);
@@ -248,40 +249,66 @@ class UserController extends SiteController
      * @return User
      */
     public function actionProfile()
-    {
-        try {
-            if (Yii::$app->user->isGuest) {
-                throw new \yii\web\UnauthorizedHttpException();
-            }
-    
-            $user = Yii::$app->user->identity;
-    
-            return [
-                'message' => 'Profil pengguna berhasil ditemukan',
-                'error' => false,
-                'data' => [
-                    'id' => $user->id,
-                    'username' => $user->username,
-                    'email' => $user->email,
-                    'gender' => $user->gender,
-                    'nik' => $user->nik,
-                    'full_name' => $user->full_name,
-                    'birthdate' => $user->birthdate,
-                    'phone_number' => $user->phone_number,
-                    'address' => $user->address,
-                    'is_completed' => (bool)$user->is_completed,
-                    'created_at' => $user->created_at,
-                    'updated_at' => $user->updated_at,
-                ],
-            ];
-        } catch (\yii\web\UnauthorizedHttpException $e) {
-            Yii::$app->response->statusCode = 401;
-            return [
-                'message' => 'Token Invalid.',
-                'error' => false,
-            ];
-        }
+{
+    if (Yii::$app->user->isGuest) {
+        return $this->redirect(['user/index']);
     }
+
+    $user = Yii::$app->user->identity;
+    $model = new EditProfileForm();
+    
+    // Jika data dikirim melalui POST (pengguna mengirim form untuk memperbarui profil)
+    if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+        
+        // Periksa jika username telah diubah dan apakah username baru sudah digunakan
+        if ($model->username !== $user->username) {
+            $existingUser = User::findOne(['username' => $model->username]);
+            if ($existingUser !== null) {
+                Yii::$app->session->setFlash('error', 'Username sudah digunakan oleh pengguna lain. Silakan gunakan username lain.');
+                return $this->refresh();
+            }
+        }
+
+        // Update data user dari model EditProfileForm
+        $user->username = $model->username ?? $user->username;
+        $user->nik = $model->nik ?? $user->nik;
+        $user->full_name = $model->full_name ?? $user->full_name;
+        $user->birthdate = $model->birthdate ?? $user->birthdate;
+        $user->phone_number = $model->phone_number ?? $user->phone_number;
+        $user->gender = $model->gender ?? $user->gender;
+        $user->address = $model->address ?? $user->address;
+
+        // Set is_completed jika semua field wajib telah diisi
+        if ($user->nik && $user->full_name && $user->birthdate && $user->phone_number && $user->gender && $user->address) {
+            $user->is_completed = 1;
+        }
+
+        // Simpan user dan periksa apakah berhasil
+        if ($user->save(false)) {
+            Yii::$app->session->setFlash('success', 'Profil berhasil diperbarui.');
+            return $this->refresh(); // Refresh halaman setelah penyimpanan berhasil
+        } else {
+            Yii::$app->session->setFlash('error', 'Gagal memperbarui profil. Silakan coba lagi.');
+        }
+    } elseif ($model->hasErrors()) {
+        // Jika ada kesalahan validasi
+        Yii::$app->session->setFlash('error', 'Data yang diberikan tidak valid. Silakan periksa kembali.');
+    }
+
+    // Load data pengguna ke model form untuk ditampilkan di form
+    $model->username = $user->username;
+    $model->nik = $user->nik;
+    $model->full_name = $user->full_name;
+    $model->birthdate = $user->birthdate;
+    $model->phone_number = $user->phone_number;
+    $model->gender = $user->gender;
+    $model->address = $user->address;
+
+    return $this->render('profile', [
+        'model' => $model,
+    ]);
+}
+
 
     /**
      * Handle retrieving all user profiles.
@@ -334,11 +361,7 @@ class UserController extends SiteController
 
             if ($user instanceof User && $user->save(false)) {
                 Yii::$app->getResponse()->setStatusCode(200); // OK
-                return [
-                    'message' => 'Profil berhasil diperbarui',
-                    'error' => false,
-                    'data' => $user,
-                ];
+                return $this -> redirect('index');
             } else {
                 Yii::$app->getResponse()->setStatusCode(500); // Internal Server Error
                 return [

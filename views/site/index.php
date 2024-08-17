@@ -1,6 +1,8 @@
 <?php
 use yii\helpers\Html;
 use yii\helpers\HtmlPurifier;
+use yii\helpers\Url;
+
 
 /**
  * @var \yii\web\View $this
@@ -90,7 +92,7 @@ $this->title = 'Dashboard';
                 <div class="col-12 col-lg-6">
                     <div class="card">
                         <div class="card-header">
-                            <h4>Sapi Saya</h4>
+                            <h4 href="<?= Url::toRoute(['/cage/index']) ?>">Sapi Saya</h4>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
@@ -111,7 +113,7 @@ $this->title = 'Dashboard';
                                     <td class="text-bold-500"><?= $livestock->vid?></td>
                                     <td class="text-bold-500"><?= $livestock->name ?></td>
                                     <td class="text-bold-500"><?= $livestock->cage->name ?></td>
-                                    <td class="text-bold-500"><?= $livestock->age ?></td>
+                                    <td class="text-bold-500"><?= $livestock->age ?> tahun</td>
                                     <td class="text-bold-500"><?= $livestock->health ?></td>
                                 </tr>
                                 <div class="modal fade" id="modalView<?= $livestock->id ?>" tabindex="-1" aria-labelledby="modalViewLabel<?= $livestock->id ?>" aria-hidden="true">

@@ -2,6 +2,8 @@
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\helpers\Url;
+use yii\helpers\StringHelper;
+
 
 /**
  * @var yii\web\View $this 
@@ -60,8 +62,8 @@ use yii\helpers\Url;
                                         <tbody>
                                             <?php foreach ($cage as $cage): ?>
                                             <tr>
-                                                <td class="text-bold-500 post"><?= $cage->name ?></td>
-                                                <td><?= $cage->location ?></td>
+                                                <td class="text-bold-500 post"><?= StringHelper::truncate($cage->name, 12, '...') ?></td>
+                                                <td><?= StringHelper::truncate($cage->location, 12, '...') ?></td>
                                                 <td><div class="comment-actions">
                                                     <button class="btn icon icon-left btn-primary me-2 text-nowrap" data-bs-toggle="modal" data-bs-target="#modalView<?= $cage->id ?>">
                                                         <i class="bi bi-eye-fill"></i> Show
