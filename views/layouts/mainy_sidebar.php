@@ -30,7 +30,7 @@ JS) ?>
 			<div class="d-flex justify-content-between align-items-center">
 				<div class="logo">
 					<a href="<?= Url::base() ?>">
-						<img src="<?= "{$themeMazer->baseUrl}/images/logo/logo.svg" ?>" alt="Logo" />
+						<img src="<?= "{$themeMazer->baseUrl}/images/logo/logo.svg" ?>" alt="Logo" style="width: 80px; height: 80px" />
 					</a>
 				</div>
 

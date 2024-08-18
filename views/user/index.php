@@ -20,7 +20,7 @@ $themeMazer = MainAsset::register($this);
         <div id="auth-center">
             <div class="auth-logo">
                 <a href="<?= Url::current() ?>">
-                    <img src="<?= "{$themeMazer->baseUrl}/images/logo/logo.svg" ?>" alt="Logo" style="    width: 200px;"/>
+                    <img src="<?= "{$themeMazer->baseUrl}/images/logo/logo.svg" ?>" alt="Logo" style="width: 200px;"/>
                 </a>
             </div>
             <h1 class="auth-title">Log in.</h1>
