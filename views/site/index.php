@@ -3,7 +3,6 @@ use yii\helpers\Html;
 use yii\helpers\HtmlPurifier;
 use yii\helpers\Url;
 
-
 /**
  * @var \yii\web\View $this
  * @var app\models\Livestock $livestock
@@ -66,6 +65,7 @@ $this->title = 'Dashboard';
                                             <tr>
                                                 <th>Nama Kandang</th>
                                                 <th>Lokasi</th>
+                                                <th>Kapasitas</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -73,6 +73,7 @@ $this->title = 'Dashboard';
                                             <tr>
                                                 <td class="text-bold-500 post"><?= $cage->name ?></td>
                                                 <td><?= $cage->location ?></td>
+                                                <td><?= $cage->getLivestockCount() . '/' . $cage->capacity ?></td>
                                                 <!-- <td><div class="comment-actions">
                                                     <button class="btn icon icon-left btn-primary me-2 text-nowrap" data-bs-toggle="modal" data-bs-target="#border-less"><i class="bi bi-eye-fill"></i> Show</button>
                                                     <button class="btn icon icon-left btn-warning me-2 text-nowrap"><i class="bi bi-pencil-square"></i> Edit</button>
@@ -306,10 +307,3 @@ $this->title = 'Dashboard';
         </div>
     </section>
 </div>
-
-<link rel="stylesheet" href="assets/extensions/quill/quill.snow.css">
-<link rel="stylesheet" href="assets/extensions/quill/quill.bubble.css">
-<script src="assets/extensions/apexcharts/apexcharts.min.js"></script>
-<script src="assets/static/js/pages/dashboard.js"></script>
-<script src="assets/extensions/quill/quill.min.js"></script>
-<script src="assets/static/js/pages/quill.js"></script>

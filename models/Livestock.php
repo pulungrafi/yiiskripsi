@@ -30,6 +30,7 @@ class Livestock extends ActiveRecord
             ],
         ];
     }
+    public $livestock_image;
 
     public function rules()
     {
@@ -38,9 +39,10 @@ class Livestock extends ActiveRecord
             [['birthdate'], 'required', 'message' => 'Masukkan tanggal lahir ternak.'],
             [['user_id', 'cage_id', 'age'], 'integer'],
             ['name', 'validateLivestockName'],
-            [['body_weight', 'chest_size'], 'number', 'min' => 0, 'tooSmall' => '{attribute} harus bernilai positif.', 'message' => '{attribute} harus berupa angka.', 'skipOnEmpty' => true],
+            [['body_weight', 'chest_size', 'hips'], 'number', 'min' => 0, 'tooSmall' => '{attribute} harus bernilai positif.', 'message' => '{attribute} harus berupa angka.', 'skipOnEmpty' => true],
             ['name', 'string', 'max' => 255],
-            [['livestock_image'], 'string'],
+            // [['livestock_image'], 'string'],
+            
             [['eid', 'vid'], 'unique', 'message' => '{attribute} sudah digunakan oleh ternak lain.'],
             [['name'], 'match', 'pattern' => '/^[A-Za-z0-9\s]{3,255}$/', 'message' => 'Nama harus terdiri dari 3 sampai 255 karakter dan hanya boleh berisi huruf, angka, dan spasi.'],
             ['eid', 'string', 'length' => 32],
@@ -50,7 +52,9 @@ class Livestock extends ActiveRecord
             [['created_at', 'updated_at', 'birthdate'], 'safe'],
             [['birthdate'], 'date', 'format' => 'php:Y-m-d', 'message' => 'Format tanggal tidak valid. Tolong gunakan format YYYY-MM-DD.'],
             [['birthdate'], 'validateBirthdate'],
-            [['livestock_image'], 'file', 'extensions' => ['png', 'jpg', 'jpeg'], 'maxSize' => 1024 * 1024 * 5, 'maxFiles' => 5, 'message' => 'Format file tidak valid atau ukuran file terlalu besar (maksimal 5 MB).'],
+            // [['livestock_image'], 'file', 'extensions' => ['png', 'jpg', 'jpeg'], 'maxSize' => 1024 * 1024 * 5, 'maxFiles' => 5, 'message' => 'Format file tidak valid atau ukuran file terlalu besar (maksimal 5 MB).'],
+            [['livestock_image'], 'file', 'extensions' => 'jpg, png', 'maxFiles' => 5, 'maxSize' => 1024 * 1024 * 5, 'maxFiles' => 5, 'message' => 'Format file tidak valid atau ukuran file terlalu besar (maksimal 5 MB).'],
+
 
             // Enum validation rules
             ['gender', 'in', 'range' => ['Jantan', 'Betina']],
@@ -68,7 +72,6 @@ class Livestock extends ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
             'eid' => 'EID',
             'vid' => 'Visual ID',
             'name' => 'Nama',
@@ -83,10 +86,13 @@ class Livestock extends ActiveRecord
             'reproduction' => 'Kondisi Reproduksi',
             'gender' => 'Jenis Kelamin',
             'age' => 'Usia',
-            'chest_size' => 'Lingkar Dada',
-            'body_weight' => 'Berat Sapi',
+            'chest_size' => 'Lingkar Dada Pertama',
+            'body_weight' => 'Berat Sapi Pertama',
+            'hips' => 'Ukuran Pinggul Pertama',
             'health' => 'Kesehatan Ternak',
             'livestock_image' => 'Foto Ternak',
+            'created_at'=> 'Dibuat Pada',
+            'updated_at'=> 'Diperbarui Pada',
         ];
     }
 
@@ -140,6 +146,23 @@ class Livestock extends ActiveRecord
 
         return $fields;
     }
+
+    public function actionBcsData($id)
+{
+    $bcsData = BodyCountScore::find()->where(['livestock_id' => $id])->all();
+
+    $data = [];
+    foreach ($bcsData as $bcs) {
+        $data[] = [
+            'date' => $bcs->date, // Ganti dengan nama atribut tanggal jika berbeda
+            'chest_size' => $bcs->chest_size,
+            'hips' => $bcs->hips,
+            'body_weight' => $bcs->body_weight,
+        ];
+    }
+
+    return $this->asJson($data);
+}
 
     public function actionCreate()
     {
@@ -303,6 +326,19 @@ class Livestock extends ActiveRecord
     }
 
     return $age;
+}
+public function uploadImage()
+{
+    if ($this->validate()) {
+        $fileName = $this->id . '_' . $this->livestock_image->baseName . '.' . $this->livestock_image->extension;
+        $filePath = 'uploads/' . $fileName;
+
+        if ($this->livestock_image->saveAs($filePath)) {
+            $this->image = file_get_contents($filePath); // Save the image content to the 'image' attribute
+            return true;
+        }
+    }
+    return false;
 }
 
 

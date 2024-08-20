@@ -15,6 +15,7 @@ use yii\web\UploadedFile;
 use yii\helpers\FileHelper;
 use Google\Cloud\Storage\StorageClient;
 use yii\helpers\Url;
+use yii\data\Pagination;
 use app\models\LoginForm;
 
 
@@ -239,22 +240,47 @@ class NoteController extends SiteController
      * @return array
      */
     public function actionIndex()
-    {
-        
-        if (Yii::$app->user->isGuest) {
-            $redirect = Url::to(['user/index']);
-            $model = new LoginForm();
-            return $this-> render($redirect , ['model'=> $model]);
- 
+{
+    if (Yii::$app->user->isGuest) {
+        $redirect = Url::to(['user/index']);
+        $model = new LoginForm();
+        return $this->render($redirect, ['model' => $model]);
+    } else {
+        $userId = Yii::$app->user->identity->id;
+        $livestock = Livestock::find()
+        ->where(['user_id' => $userId])
+        ->all();
+
+    // Validasi cage_id berdasarkan user_id
+        if (empty($livestock)) {
+            return $this->render('error', [
+                'message' => 'Sapi tidak boleh kosong, mohon buat sapi terlebih dahulu.',
+                'error' => true,
+            ]);
         }
-        else{
-            $model = new Note();
-            $notes = Note::find()->where(['user_id' => Yii::$app->user->id])->all();
-            return $this->render('index', [
-                'notes'=> $notes,
-                'model'=> $model,
-                ]);
-    }}
+        $model = new Note();
+        // First, get the query object
+        $query = Note::find()->where(['user_id' => Yii::$app->user->id])->orderBy(['created_at' => SORT_DESC]);
+
+        // Create a pagination object with a limit of 10 items per page
+        $pagination = new Pagination([
+            'defaultPageSize' => 10,
+            'totalCount' => $query->count(),
+        ]);
+
+        // Apply pagination to the query
+        $notes = $query->offset($pagination->offset)
+                       ->limit($pagination->limit)
+                       ->all();
+
+        return $this->render('index', [
+            'notes' => $notes,
+            'pagination' => $pagination,
+            'model' => $model,
+        ]);
+    }
+}
+
 
     /**
      * Get note data by livestock_id.

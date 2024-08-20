@@ -2,6 +2,8 @@
 
 use yii2\theme\mazer\MainAsset;
 use yii\helpers\Html;
+// use kartik\icons\Icon;
+// Icon::map($this);  
 
 /**
  * @var yii\web\View $this
@@ -43,3 +45,4 @@ $themeMazer = MainAsset::register($this);
 
 </html>
 <?php $this->endPage() ?>
+

@@ -21,6 +21,8 @@ $this->title = 'Update Kandang: ' . $model->name;
         <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 
         <?= $form->field($model, 'location')->textInput(['maxlength' => true]) ?>
+        <?= $form->field($model, 'capacity')->input('number', ['placeholder' => 'Masukkan kapasitas kandang']) ?>
+
 
         <?= $form->field($model, 'description')->textarea(['rows' => 6]) ?> 
 

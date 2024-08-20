@@ -34,7 +34,7 @@ $this->title = 'Profil Saya';
                     <?= $form->field($model, 'gender')->dropDownList([
                         'Male' => 'Laki-laki',
                         'Female' => 'Perempuan',
-                    ], ['prompt' => 'Pilih Gender']) ?>
+                    ], ['prompt' => 'Pilih Jenis Kelamin']) ?>
                     <?= $form->field($model, 'birthdate')->input('date') ?>
                     <?= $form->field($model, 'phone_number')->textInput() ?>
                     <?= $form->field($model, 'address')->textarea(['rows' => 3]) ?>

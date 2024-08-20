@@ -57,6 +57,17 @@ class BcsController extends SiteController
     public function actionIndex()
 {
     $userId = Yii::$app->user->identity->id;
+    $livestock = Livestock::find()
+        ->where(['user_id' => $userId])
+        ->all();
+
+    // Validasi cage_id berdasarkan user_id
+    if (empty($livestock)) {
+        return $this->render('error', [
+            'message' => 'Sapi tidak boleh kosong, mohon buat sapi terlebih dahulu.',
+            'error' => true,
+        ]);
+    }
     $bcs = BodyCountScore::find()
         ->joinWith('livestock')  // Join dengan tabel livestock
         ->where(['livestock.user_id' => $userId])

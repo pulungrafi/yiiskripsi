@@ -11,7 +11,7 @@ use yii\helpers\Url;
  * @var app\models\BodyCountScore $model 
  */
 
- $this->title = 'Daftar BCS';
+ $this->title = 'Tambah BCS';
  ?>
 
 <div class="page-content"> 
@@ -31,7 +31,7 @@ use yii\helpers\Url;
                                     <?= $form->field($model, 'livestock_id')->dropDownList(
                                         \yii\helpers\ArrayHelper::map(Livestock::find()->where(['user_id' => Yii::$app->user->id])->all(), 'id', 'name'),
                                         ['prompt' => 'Pilih Sapi']
-                                    ) ?>
+                                    )->label('Nama Ternak') ?>
                                     <?= $form->field($model, 'body_weight')->input('number', ['placeholder' => 'Masukkan berat badan (kg)']) ?>
                                     <?= $form->field($model, 'chest_size')->input('number', ['placeholder' => 'Masukkan ukuran dada (cm)']) ?>
                                     <?= $form->field($model, 'hips')->input('number', ['placeholder' => 'Masukkan ukuran pinggul (cm)']) ?>
@@ -107,8 +107,12 @@ use yii\helpers\Url;
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
                                                         <div class="modal-body">
-                                                        <?php foreach ($bcs->attributes as $attribute => $value): ?>
-                                                            <strong><?= ucfirst(str_replace('_', ' ', $attribute)) ?>:</strong> <?= $value ?><br>
+                                                        <?php foreach ($bcs->attributes as $attributeLabels => $value): ?>
+                                                            <?php foreach ($bcs->attributeLabels() as $keyattr => $valueattr):?>
+                                                                <?php if ($keyattr === $attributeLabels ):?>
+                                                                    <strong><?= ucfirst(str_replace('_', ' ', $valueattr)) ?> : </strong> <?= $value ?><br>
+                                                                <?php endif; ?>
+                                                                <?php endforeach; ?>
                                                         <?php endforeach; ?>
                                                         </div>
                                                         <div class="modal-footer">
@@ -120,7 +124,7 @@ use yii\helpers\Url;
                                             <?php endforeach; ?>
                                         </tbody>
                                     <?php else: ?>
-                                        <p>Anda belum memiliki kandang.</p>
+                                        <p>Anda belum memiliki log BCS.</p>
                                     <?php endif; ?>
                         </table>
                     </div>

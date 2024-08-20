@@ -8,7 +8,7 @@ use yii\widgets\ActiveForm;
  * @var app\models\Cage $cage 
  */
 
- $this->title = 'Daftar Kandang';
+ $this->title = 'Tambah Kandang';
  ?>
 
 <div class="page-content"> 

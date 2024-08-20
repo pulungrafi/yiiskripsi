@@ -3,6 +3,9 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\helpers\Url;
 use app\models\Cage;
+use yii\widgets\LinkPager;
+
+
 /**
  * @var \yii\web\View $this
  * @var yii\widgets\ActiveForm $form
@@ -11,127 +14,57 @@ use app\models\Cage;
  */
 
 $this->title = 'Daftar Sapi';
+$this->registerJs("
+    // Add symbol 'kg' after the input in the feed_weight field
+    $('#livestock-form #body_weight').on('input', function() {
+        var value = $(this).val().replace(/[^0-9]/g, '');
+        $(this).val(value + ' kg');
+    });
+    // Add symbol 'cm' after the input in the feed_weight field
+    $('#livestock-form #chest_size').on('input', function() {
+        var value = $(this).val().replace(/[^0-9]/g, '');
+        $(this).val(value + ' cm');
+    });
+
+    // Before the form is submitted, strip the symbols
+    $('#livestock-form').on('submit', function() {
+        var chestSizeValue = $('#livestock-form #chest_size').val().replace(' cm', '');
+        $('#livestock-form #chest_size').val(chestSizeValue);
+        var bodyWeightValue = $('#livestock-form #body_weight').val().replace(' kg', '');
+        $('#livestock-form #body_weight').val(bodyWeightValue);
+    });
+");
 ?>
+<?php
+// Check if there is a flash message to show
+if (Yii::$app->session->hasFlash('error')): ?>
+    <div class="modal fade" id="warningModal" tabindex="-1" aria-labelledby="warningModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="warningModalLabel">Peringatan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <?= Yii::$app->session->getFlash('error') ?>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
 <div class="page-content"> 
     <section class="row">
-        <div class="col-12">
-            <section class="section">
-                <div class="card">
-                    <div class="card-content">
-                        <div class="card-body">
-                            <h4 class="card-title mb-4">Buat Sapi Baru</h4>
-                                <?php $form = ActiveForm::begin([
-                                    'id'=> 'livestock-form',
-                                    'action'=> 'create',
-                                    'method'=> 'post',
-                                ]); ?>
-                                    <div class="form-body">
-                                        <div class="form-body row">
-                                            <div class = "col">
-                                            <?= $form->field($model, 'eid')->textInput(['maxlength' => true, 'placeholder' => 'Masukkan kode EID']) ?>
-                                            <?= $form->field($model, 'name')->textInput(['maxlength' => true, 'placeholder' => 'Masukkan nama hewan ternak']) ?>
-                                            <?= $form->field($model, 'birthdate')->input('date', ['placeholder' => 'Masukkan tanggal lahir']) ?>
-                                            <?= $form->field($model, 'cage_id')->dropDownList(
-                                                \yii\helpers\ArrayHelper::map(Cage::find()->where(['user_id' => Yii::$app->user->id])->all(), 'id', 'name'),
-                                                ['prompt' => 'Pilih Kandang']
-                                            ) ?>
-
-                                            <?= $form->field($model, 'type_of_livestock')->dropDownList([
-                                                'Kambing' => 'Kambing',
-                                                'Sapi' => 'Sapi',
-                                            ], ['prompt' => 'Pilih jenis hewan ternak']) ?>
-
-                                            <?= $form->field($model, 'breed_of_livestock')->dropDownList([
-                                                'Madura' => 'Madura',
-                                                'Bali' => 'Bali',
-                                                'Limousin' => 'Limousin',
-                                                'Brahman' => 'Brahman',
-                                            ], ['prompt' => 'Pilih ras hewan ternak']) ?>
-
-                                            <?= $form->field($model, 'purpose')->dropDownList([
-                                                'Indukan' => 'Indukan',
-                                                'Penggemukan' => 'Penggemukan',
-                                                'Tabungan' => 'Tabungan',
-                                                'Belum Tahu' => 'Belum Tahu',
-                                            ], ['prompt' => 'Pilih tujuan pemeliharaan']) ?>
-
-                                            <?= $form->field($model, 'maintenance')->dropDownList([
-                                                'Kandang' => 'Kandang',
-                                                'Gembala' => 'Gembala',
-                                                'Campuran' => 'Campuran',
-                                            ], ['prompt' => 'Pilih jenis pemeliharaan']) ?>
-
-                                            </div>
-                                            <div class = "col">
-                                                <?= $form->field($model, 'vid')->textInput(['maxlength' => true, 'placeholder' => 'Masukkan kode VID']) ?>
-                                                <?= $form->field($model, 'ownership_status')->dropDownList([
-                                                    'Sendiri' => 'Sendiri',
-                                                    'Kelompok' => 'Kelompok',
-                                                    'Titipan' => 'Titipan',
-                                                ], ['prompt' => 'Pilih status kepemilikan']) ?>
-
-                                            <?= $form->field($model, 'reproduction')->dropDownList([
-                                                'Tidak Bunting' => 'Tidak Bunting',
-                                                'Bunting < 1 bulan' => 'Bunting < 1 bulan',
-                                                'Bunting 1 bulan' => 'Bunting 1 bulan',
-                                                'Bunting 2 bulan' => 'Bunting 2 bulan',
-                                                'Bunting 3 bulan' => 'Bunting 3 bulan',
-                                                'Bunting 4 bulan' => 'Bunting 4 bulan',
-                                                'Bunting 5 bulan' => 'Bunting 5 bulan',
-                                                'Bunting 6 bulan' => 'Bunting  bulan',
-                                                'Bunting 7 bulan' => 'Bunting 7 bulan',
-                                                'Bunting 8 bulan' => 'Bunting 8 bulan',
-                                                'Bunting 9 bulan' => 'Bunting 9 bulan',
-                                                'Bunting 10 bulan' => 'Bunting 10 bulan',
-                                                'Bunting 11 bulan' => 'Bunting 11 bulan',
-                                                'Bunting > 11 bulan' => 'Bunting > 11 bulan',
-                                            ], ['prompt' => 'Pilih status reproduksi']) ?>
-
-                                            <?= $form->field($model, 'gender')->dropDownList([
-                                                'Jantan' => 'Jantan',
-                                                'Betina' => 'Betina',
-                                            ], ['prompt' => 'Pilih jenis kelamin']) ?>
-
-                                            <?= $form->field($model, 'chest_size')->input('number', ['placeholder' => 'Masukkan ukuran dada (cm)']) ?>
-
-                                            <?= $form->field($model, 'body_weight')->input('number', ['placeholder' => 'Masukkan berat badan (kg)']) ?>
-
-                                            <?= $form->field($model, 'health')->dropDownList([
-                                                'Sehat' => 'Sehat',
-                                                'Sakit' => 'Sakit',
-                                            ], ['prompt' => 'Pilih status kesehatan']) ?>
-                                            <?= $form->field($model, 'source')->dropDownList([
-                                                'Sejak Lahir' => 'Sejak Lahir',
-                                                'Bantuan Pemerintah' => 'Bantuan Pemerintah',
-                                                'Beli' => 'Beli',
-                                                'Beli dari Luar Kelompok' => 'Beli dari Luar Kelompok',
-                                                'Beli dari Dalam Kelompok' => 'Beli dari Dalam Kelompok',
-                                                'Inseminasi Buatan' => 'Inseminasi Buatan',
-                                                'Kawin Alam' => 'Kawin Alam',
-                                                'Tidak Tahu' => 'Tidak Tahu',
-                                            ], ['prompt' => 'Pilih sumber hewan ternak']) ?>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="form-actions d-flex justify-content-end mt-3">
-                                        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
-                                        <!-- <button type="submit" class="btn btn-primary me-1">Submit</button> -->
-                                    </div>
-                                <?php ActiveForm::end(); ?>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-
-        <div class="row">
+    <div class="col-12">
             <div class="card">
                 <div class="card-header">
                     <h4>Sapi Terdaftar</h4>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-borderless mb-0">
+                        <table id="example" class="table table-borderless mb-0">
                             <?php if (!empty($livestock)): ?> 
                             <thead>
                                 <tr>
@@ -175,6 +108,10 @@ $this->title = 'Daftar Sapi';
                                                             ],
                                                         ]
                                                     ) ?>
+                                                     <button class="btn icon icon-left btn-info me-2" onclick="showBcsChart(<?= $livestock->id ?>)">                                                       
+                                                         <i class="bi bi-file-bar-graph"></i>Grafik BCS
+                                                        </button>
+
                                                 </div></td>
                                 </tr>
                                 <div class="modal fade" id="modalView<?= $livestock->id ?>" tabindex="-1" aria-labelledby="modalViewLabel<?= $livestock->id ?>" aria-hidden="true">
@@ -185,8 +122,31 @@ $this->title = 'Daftar Sapi';
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
                                                         <div class="modal-body">
-                                                        <?php foreach ($livestock->attributes as $attribute => $value): ?>
-                                                            <strong><?= ucfirst(str_replace('_', ' ', $attribute)) ?>:</strong> <?= $value ?><br>
+                                                        
+                                                        <?php foreach ($livestock->attributes as $attributeLabels => $value): ?>
+                                                            <?php foreach ($livestock->attributeLabels() as $keyattr => $valueattr):?>
+                                                                <?php if ($keyattr === $attributeLabels ):?>
+                                                                    <?php
+                                                                        // Custom labels and formatting
+                                                                        if ($keyattr === 'cage_id') {
+                                                                            $value = $livestock->cage->name;
+                                                                        }elseif ($keyattr === 'chest_size') {
+                                                                            $label = ucfirst(str_replace('_', ' ', $valueattr));
+                                                                            $value = $value . ' cm';
+                                                                        } elseif ($keyattr === 'body_weight') {
+                                                                            $label = ucfirst(str_replace('_', ' ', $valueattr));
+                                                                            $value = $value . ' kg';
+                                                                        } elseif ($keyattr === 'hips') {
+                                                                            $label = ucfirst(str_replace('_', ' ', $valueattr));
+                                                                            $value = $value . ' cm';
+                                                                        } else {
+                                                                            $label = ucfirst(str_replace('_', ' ', $valueattr));
+                                                                        }
+                                                                        ?>
+                                                                    <strong><?= ucfirst(str_replace('_', ' ', $valueattr)) ?> : </strong> <?= $value ?><br>
+                                                                <?php endif; ?>
+                                                               
+                                                                <?php endforeach; ?>
                                                         <?php endforeach; ?>
                                                         </div>
                                                         <div class="modal-footer">
@@ -197,6 +157,18 @@ $this->title = 'Daftar Sapi';
                                             </div>
                             <?php endforeach; ?>
                             </tbody>
+                            <?= LinkPager::widget([
+                                'pagination' => $pagination,
+                                'options' => ['class' => 'pagination pagination-primary mt-3'], // Set the pagination class
+                                'linkOptions' => ['class' => 'page-link'], // Set the link class
+                                'pageCssClass' => 'page-item', // Set the page item class
+                                'prevPageCssClass' => 'page-item', // Set the previous button class
+                                'nextPageCssClass' => 'page-item', // Set the next button class
+                                'activePageCssClass' => 'active', // Set the active page class
+                                'prevPageLabel' => '<i class="bi bi-chevron-left"></i>', // Previous page label
+                                'nextPageLabel' => '<i class="bi bi-chevron-right"></i>', // Next page label
+                                'disabledPageCssClass' => 'disabled', // Disabled page class
+                            ]); ?>
                             <?php else: ?>
                                <p>Anda belum memiliki Sapi.</p>
                             <?php endif; ?>
@@ -204,6 +176,216 @@ $this->title = 'Daftar Sapi';
                     </div>
                 </div>
             </div>
+        </div>    
+    <div class="col-12">
+            <section class="section">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-body">
+                            <h4 class="card-title mb-4">Buat Sapi Baru</h4>
+                                <?php $form = ActiveForm::begin([
+                                    'id'=> 'livestock-form',
+                                    'action'=> 'create',
+                                    'method'=> 'post',
+                                    'options' => ['enctype' => 'multipart/form-data'],
+                                ]); ?>
+                                    <div class="form-body">
+                                        <div class="form-body row">
+                                            <div class = "col">
+                                            <?= $form->field($model, 'eid')->textInput(['maxlength' => true, 'placeholder' => 'Masukkan kode EID']) ?>
+                                            <?= $form->field($model, 'name')->textInput(['maxlength' => true, 'placeholder' => 'Masukkan nama hewan ternak']) ?>
+                                            <?= $form->field($model, 'birthdate')->input('date', ['placeholder' => 'Masukkan tanggal lahir']) ?>
+                                            <?= $form->field($model, 'cage_id')->dropDownList(
+                                                \yii\helpers\ArrayHelper::map(Cage::find()->where(['user_id' => Yii::$app->user->id])->all(), 'id', 'name'),
+                                                ['prompt' => 'Pilih Kandang']
+                                            ) ?>
+
+                                            <?= $form->field($model, 'type_of_livestock')->dropDownList([
+                                                'Kambing' => 'Kambing',
+                                                'Sapi' => 'Sapi',
+                                            ], ['prompt' => 'Pilih jenis hewan ternak']) ?>
+
+                                            <?= $form->field($model, 'breed_of_livestock')->dropDownList([
+                                                'Madura' => 'Madura',
+                                                'Bali' => 'Bali',
+                                                'Limousin' => 'Limousin',
+                                                'Brahman' => 'Brahman',
+                                            ], ['prompt' => 'Pilih ras hewan ternak']) ?>
+
+                                            <?= $form->field($model, 'purpose')->dropDownList([
+                                                'Indukan' => 'Indukan',
+                                                'Penggemukan' => 'Penggemukan',
+                                                'Tabungan' => 'Tabungan',
+                                                'Belum Tahu' => 'Belum Tahu',
+                                            ], ['prompt' => 'Pilih tujuan pemeliharaan']) ?>
+
+                                            <?= $form->field($model, 'maintenance')->dropDownList([
+                                                'Kandang' => 'Kandang',
+                                                'Gembala' => 'Gembala',
+                                                'Campuran' => 'Campuran',
+                                            ], ['prompt' => 'Pilih jenis pemeliharaan']) ?>
+                                            <?= $form->field($model, 'livestock_image[]')->fileInput(['multiple' => true, 'class' => 'form-control']) ?>
+                                            </div>
+                                            <div class = "col">
+                                                <?= $form->field($model, 'vid')->textInput(['maxlength' => true, 'placeholder' => 'Masukkan kode VID']) ?>
+                                                <?= $form->field($model, 'ownership_status')->dropDownList([
+                                                    'Sendiri' => 'Sendiri',
+                                                    'Kelompok' => 'Kelompok',
+                                                    'Titipan' => 'Titipan',
+                                                ], ['prompt' => 'Pilih status kepemilikan']) ?>
+
+                                            <?= $form->field($model, 'reproduction')->dropDownList([
+                                                'Tidak Bunting' => 'Tidak Bunting',
+                                                'Bunting < 1 bulan' => 'Bunting < 1 bulan',
+                                                'Bunting 1 bulan' => 'Bunting 1 bulan',
+                                                'Bunting 2 bulan' => 'Bunting 2 bulan',
+                                                'Bunting 3 bulan' => 'Bunting 3 bulan',
+                                                'Bunting 4 bulan' => 'Bunting 4 bulan',
+                                                'Bunting 5 bulan' => 'Bunting 5 bulan',
+                                                'Bunting 6 bulan' => 'Bunting  bulan',
+                                                'Bunting 7 bulan' => 'Bunting 7 bulan',
+                                                'Bunting 8 bulan' => 'Bunting 8 bulan',
+                                                'Bunting 9 bulan' => 'Bunting 9 bulan',
+                                                'Bunting 10 bulan' => 'Bunting 10 bulan',
+                                                'Bunting 11 bulan' => 'Bunting 11 bulan',
+                                                'Bunting > 11 bulan' => 'Bunting > 11 bulan',
+                                            ], ['prompt' => 'Pilih status reproduksi']) ?>
+
+                                            <?= $form->field($model, 'gender')->dropDownList([
+                                                'Jantan' => 'Jantan',
+                                                'Betina' => 'Betina',
+                                            ], ['prompt' => 'Pilih jenis kelamin']) ?>
+
+                                            <?= $form->field($model, 'chest_size')->textInput([
+                                                'id' => 'chest_size',
+                                                'type' => 'text',
+                                                'maxlength'=> true,
+                                                'placeholder' => 'Masukkan ukuran dada (cm)'
+                                                ]) ?>
+
+                                            <?= $form->field($model, 'body_weight')->textInput([
+                                                'placeholder' => 'Masukkan berat badan (kg)',
+                                                'id'=> 'body_weight',
+                                                'type'=> 'text',
+                                                'maxlength'=> true,
+                                                ]) ?>
+
+                                            <?= $form->field($model, 'hips')->textInput([
+                                                'placeholder' => 'Masukkan berat badan (kg)',
+                                                'id'=> 'body_weight',
+                                                'type'=> 'text',
+                                                'maxlength'=> true,
+                                                ]) ?>
+
+                                            <?= $form->field($model, 'health')->dropDownList([
+                                                'Sehat' => 'Sehat',
+                                                'Sakit' => 'Sakit',
+                                            ], ['prompt' => 'Pilih status kesehatan']) ?>
+                                            <?= $form->field($model, 'source')->dropDownList([
+                                                'Sejak Lahir' => 'Sejak Lahir',
+                                                'Bantuan Pemerintah' => 'Bantuan Pemerintah',
+                                                'Beli' => 'Beli',
+                                                'Beli dari Luar Kelompok' => 'Beli dari Luar Kelompok',
+                                                'Beli dari Dalam Kelompok' => 'Beli dari Dalam Kelompok',
+                                                'Inseminasi Buatan' => 'Inseminasi Buatan',
+                                                'Kawin Alam' => 'Kawin Alam',
+                                                'Tidak Tahu' => 'Tidak Tahu',
+                                            ], ['prompt' => 'Pilih sumber hewan ternak']) ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-actions d-flex justify-content-end mt-3">
+                                        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+                                        <!-- <button type="submit" class="btn btn-primary me-1">Submit</button> -->
+                                    </div>
+                                <?php ActiveForm::end(); ?>
+                                <script>
+                                // Show the modal if there's a flash message
+                                <?php if (Yii::$app->session->hasFlash('error')): ?>
+                                    $(document).ready(function() {
+                                        $('#warningModal').modal('show');
+                                    });
+                                <?php endif; ?>
+                            </script>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
+
+        
     </section>
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Add a modal or container for the chart -->
+<div id="bcsChartContainer" style="display:none;">
+    <canvas id="bcsChart"></canvas>
 </div>
+
+<script>
+function showBcsChart(livestockId) {
+    fetch(`index.php?r=controller/bcs-data&id=${livestockId}`)
+        .then(response => response.json())
+        .then(data => {
+            // Extract data for the chart
+            const dates = data.map(item => item.date);
+            const chestSizes = data.map(item => item.chest_size);
+            const hips = data.map(item => item.hips);
+            const bodyWeights = data.map(item => item.body_weight);
+
+            // Create the chart
+            const ctx = document.getElementById('bcsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [
+                        {
+                            label: 'Chest Size',
+                            data: chestSizes,
+                            borderColor: 'blue',
+                            fill: false
+                        },
+                        {
+                            label: 'Hips',
+                            data: hips,
+                            borderColor: 'red',
+                            fill: false
+                        },
+                        {
+                            label: 'Body Weight',
+                            data: bodyWeights,
+                            borderColor: 'green',
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'day'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Values'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Show the chart container
+            document.getElementById('bcsChartContainer').style.display = 'block';
+        });
+}
+</script>

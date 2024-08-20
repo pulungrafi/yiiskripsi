@@ -74,7 +74,6 @@ class Note extends ActiveRecord
     public function attributeLabels()
     {
         return [
-            'livestock_id' => 'Livestock ID',
             'livestock_vid' => 'Visual ID',
             'livestock_name' => 'Nama Ternak',
             'livestock_cage' => 'Kandang',
@@ -82,9 +81,11 @@ class Note extends ActiveRecord
             'livestock_feed' => 'Pakan Ternak',
             'feed_weight' => 'Berat Pakan',
             'vitamin' => 'Vitamin',
-            'costs' => 'Biaya',
-            'details' => 'Details',
+            'costs' => 'Biaya Pakan',
+            'details' => 'Deskripsi',
             'documentation' => 'Dokumentasi',
+            'created_at'=> 'Dibuat Pada',
+            'updated_at'=> 'Diperbarui Pada',
         ];
     }
 
@@ -103,6 +104,15 @@ class Note extends ActiveRecord
     public function getNoteImages()
     {
         return $this->hasMany(NoteImage::class, ['note_id' => 'id']);
+    }
+    
+    /**
+     * Gets the related Livestock model.
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLivestock()
+    {
+        return $this->hasOne(Livestock::class, ['id' => 'livestock_id']);
     }
 
     public function afterSave($insert, $changedAttributes)

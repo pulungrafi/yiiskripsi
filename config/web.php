@@ -79,7 +79,7 @@ $config = [
     ],
     'params' => [
         $params,
-        'user_id' => 8,
+        'icon-framework' => 'fa',
         ]
 ];
 

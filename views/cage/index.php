@@ -11,12 +11,12 @@ use yii\helpers\StringHelper;
  * @var app\models\Cage $model 
  */
 
- $this->title = 'Daftar Kandang';
+ $this->title = 'Tambah Kandang';
  ?>
 
 <div class="page-content"> 
     <section class="row">
-        <div class="col-12 col-lg-7">
+        <div class="col-12 col-lg-5">
             <section class="section">
                 <div class="card">
                     <div class="card-content">
@@ -30,6 +30,7 @@ use yii\helpers\StringHelper;
                                 <div class="form-body">
                                     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
                                     <?= $form->field($model, 'location')->textInput(['maxlength' => true]) ?>
+                                    <?= $form->field($model, 'capacity')->input('number') ?>
                                     <?= $form->field($model, 'description')->textarea(['rows' => 6]) ?>
                                 </div>
                                 <div class="form-actions d-flex justify-content-end mt-3">
@@ -44,7 +45,7 @@ use yii\helpers\StringHelper;
             </section>
         </div>
 
-        <div class="col-12 col-lg-5">
+        <div class="col-12 col-lg-7">
             <div class="card">
                 <div class="card-header">
                     <h4>Kandang Terdaftar</h4>
@@ -57,6 +58,7 @@ use yii\helpers\StringHelper;
                                             <tr>
                                                 <th>Nama Kandang</th>
                                                 <th>Lokasi</th>
+                                                <th>Kapasitas</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -64,6 +66,7 @@ use yii\helpers\StringHelper;
                                             <tr>
                                                 <td class="text-bold-500 post"><?= StringHelper::truncate($cage->name, 12, '...') ?></td>
                                                 <td><?= StringHelper::truncate($cage->location, 12, '...') ?></td>
+                                                <td><?= StringHelper::truncate($cage->capacity, 12, '...') ?></td>
                                                 <td><div class="comment-actions">
                                                     <button class="btn icon icon-left btn-primary me-2 text-nowrap" data-bs-toggle="modal" data-bs-target="#modalView<?= $cage->id ?>">
                                                         <i class="bi bi-eye-fill"></i> Show
@@ -99,8 +102,13 @@ use yii\helpers\StringHelper;
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
                                                         <div class="modal-body">
-                                                        <?php foreach ($cage->attributes as $attribute => $value): ?>
-                                                            <strong><?= ucfirst(str_replace('_', ' ', $attribute)) ?>:</strong> <?= $value ?><br>
+                                                        <?php foreach ($cage->attributes as $attributeLabels => $value): ?>
+                                                            <?php foreach ($cage->attributeLabels() as $keyattr => $valueattr):?>
+                                                                <?php if ($keyattr === $attributeLabels ):?>
+                                                                    <strong><?= ucfirst(str_replace('_', ' ', $valueattr)) ?> : </strong> <?= $value ?><br>
+                                                                <?php endif; ?>
+                                                               
+                                                                <?php endforeach; ?>
                                                         <?php endforeach; ?>
                                                         </div>
                                                         <div class="modal-footer">

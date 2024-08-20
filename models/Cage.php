@@ -37,6 +37,7 @@ class Cage extends ActiveRecord
             [['name', 'location', 'description'], 'required',  'message' => '{attribute} tidak boleh kosong.'],
             [['name', 'location', 'description'], 'safe', 'on' => self::SCENARIO_UPDATE],
             [['location', 'description'], 'string', 'max' => 255],
+            [['capacity'], 'number', 'min' => 0, 'tooSmall' => '{attribute} harus bernilai positif.', 'message' => '{attribute} harus berupa angka.', 'skipOnEmpty' => true],
             [['name'], 'string', 'max' => 50],
             ['name', 'validateCageName'],
             ['user_id', 'integer'],
@@ -79,11 +80,12 @@ class Cage extends ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
             'name' => 'Nama Kandang',
             'location' => 'Lokasi Kandang',
+            'capacity' => 'Kapasitas Kandang',
             'description' => 'Deskripsi Kandang',
-            'user_id' => 'User ID',
+            'created_at'=> 'Dibuat Pada',
+            'updated_at'=> 'Diperbarui Pada',
         ];
     }
 
@@ -102,6 +104,10 @@ class Cage extends ActiveRecord
             $this->addError($attribute, 'Anda sudah memiliki kandang dengan nama yang sama. Silakan gunakan nama yang berbeda.');
         }
     }
+    public function getLivestockCount()
+{
+    return Livestock::find()->where(['cage_id' => $this->id])->count();
+}
 
     public function afterSave($insert, $changedAttributes)
     {

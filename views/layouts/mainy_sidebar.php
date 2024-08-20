@@ -83,13 +83,13 @@ JS) ?>
 					</a>
 					<ul class="submenu">
 						<li class="submenu-item">
-							<a href="<?= Url::toRoute(['/cage/index']) ?>">Daftar Kandang</a>
+							<a href="<?= Url::toRoute(['/cage/index']) ?>">Tambah Kandang</a>
 						</li>
 						<li class="submenu-item">
-							<a href="<?= Url::toRoute(['/livestock/index']) ?>">Daftar Sapi</a>
+							<a href="<?= Url::toRoute(['/livestock/index']) ?>">Tambah Sapi</a>
 						</li>
 						<li class="submenu-item">
-							<a href="<?= Url::toRoute(['/bcs/index']) ?>">Daftar BCS</a>
+							<a href="<?= Url::toRoute(['/bcs/index']) ?>">Tambah BCS</a>
 						</li>
 
 						<!-- <li class="submenu-item">

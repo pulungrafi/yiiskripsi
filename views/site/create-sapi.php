@@ -8,8 +8,10 @@ use yii\widgets\ActiveForm;
  * @var app\models\LivestockImage $image
  */
 
-$this->title = 'Daftar Sapi';
+
+$this->title = 'Tambah Sapi';
 ?>
+
 <div class="page-content"> 
     <section class="row">
         <div class="col-12">
@@ -270,12 +272,3 @@ role="dialog" aria-labelledby="myModalLabel1" aria-hidden="true">
     </div>
 </div>
 </div>
-{% endblock %}
-{% block js %}
-<link rel="stylesheet" href="assets/extensions/quill/quill.snow.css">
-<link rel="stylesheet" href="assets/extensions/quill/quill.bubble.css">
-<script src="assets/extensions/apexcharts/apexcharts.min.js"></script>
-<script src="assets/static/js/pages/dashboard.js"></script>
-<script src="assets/extensions/quill/quill.min.js"></script>
-<script src="assets/static/js/pages/quill.js"></script>
-{% endblock %}

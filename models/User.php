@@ -71,6 +71,17 @@ class User extends ActiveRecord implements IdentityInterface
             ['is_completed', 'boolean'],
         ];
     }
+    public function attributeLabels()
+    {
+        return [
+            'username' => 'Nama Pengguna',
+            'gender' => 'Jenis Kelamin',
+            'birthdate' => 'Tanggal Lahir',
+            'full_name' => 'Nama Lengkap',
+            'phone_number' => 'No. Handphone',
+            'address' => 'Alamat',
+        ];
+    }
 
     /**
      * {@inheritdoc}

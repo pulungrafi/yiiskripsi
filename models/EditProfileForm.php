@@ -40,13 +40,13 @@ class EditProfileForm extends Model
     public function attributeLabels()
     {
         return [
-            'username' => 'Username',
+            'username' => 'Nama Pengguna',
             'nik' => 'NIK',
-            'full_name' => 'Full Name',
-            'birthdate' => 'Birthdate',
-            'phone_number' => 'Phone Number',
-            'gender' => 'Gender',
-            'address' => 'Address',
+            'full_name' => 'Nama Lengkap',
+            'birthdate' => 'Tanggal Lahir',
+            'phone_number' => 'No. Handphone',
+            'gender' => 'Jenis Kelamin',
+            'address' => 'Alamat',
         ];
     }
 

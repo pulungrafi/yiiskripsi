@@ -16,15 +16,14 @@ $this->title = 'Update Kandang: ' . $model->name;
         <?php $form = ActiveForm::begin([
             'id' => 'update-form',
             'method' => 'put',
+            'options' => ['enctype' => 'multipart/form-data']
         ]); ?>
 <div class="form-body">
                                         <div class="form-body row">
-                                            <div class = "col">
+                                        <div class = "col">
                                             <?= $form->field($model, 'eid')->textInput(['maxlength' => true, 'placeholder' => 'Masukkan kode EID']) ?>
                                             <?= $form->field($model, 'name')->textInput(['maxlength' => true, 'placeholder' => 'Masukkan nama hewan ternak']) ?>
-                                            
                                             <?= $form->field($model, 'birthdate')->input('date', ['placeholder' => 'Masukkan tanggal lahir']) ?>
-                                            
                                             <?= $form->field($model, 'cage_id')->dropDownList(
                                                 \yii\helpers\ArrayHelper::map(Cage::find()->where(['user_id' => Yii::$app->user->id])->all(), 'id', 'name'),
                                                 ['prompt' => 'Pilih Kandang']
@@ -54,7 +53,7 @@ $this->title = 'Update Kandang: ' . $model->name;
                                                 'Gembala' => 'Gembala',
                                                 'Campuran' => 'Campuran',
                                             ], ['prompt' => 'Pilih jenis pemeliharaan']) ?>
-
+                                            <?= $form->field($model, 'livestock_image[]')->fileInput(['class' => 'form-control']) ?>
                                             </div>
                                             <div class = "col">
                                                 <?= $form->field($model, 'vid')->textInput(['maxlength' => true, 'placeholder' => 'Masukkan kode VID']) ?>
@@ -86,9 +85,26 @@ $this->title = 'Update Kandang: ' . $model->name;
                                                 'Betina' => 'Betina',
                                             ], ['prompt' => 'Pilih jenis kelamin']) ?>
 
-                                            <?= $form->field($model, 'chest_size')->input('number', ['placeholder' => 'Masukkan ukuran dada (cm)']) ?>
+                                            <?= $form->field($model, 'chest_size')->textInput([
+                                                'id' => 'chest_size',
+                                                'type' => 'text',
+                                                'maxlength'=> true,
+                                                'placeholder' => 'Masukkan ukuran dada (cm)'
+                                                ]) ?>
 
-                                            <?= $form->field($model, 'body_weight')->input('number', ['placeholder' => 'Masukkan berat badan (kg)']) ?>
+                                            <?= $form->field($model, 'body_weight')->textInput([
+                                                'placeholder' => 'Masukkan berat badan (kg)',
+                                                'id'=> 'body_weight',
+                                                'type'=> 'text',
+                                                'maxlength'=> true,
+                                                ]) ?>
+
+                                            <?= $form->field($model, 'hips')->textInput([
+                                                'placeholder' => 'Masukkan berat badan (kg)',
+                                                'id'=> 'body_weight',
+                                                'type'=> 'text',
+                                                'maxlength'=> true,
+                                                ]) ?>
 
                                             <?= $form->field($model, 'health')->dropDownList([
                                                 'Sehat' => 'Sehat',

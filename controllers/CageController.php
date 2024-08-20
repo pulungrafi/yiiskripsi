@@ -6,6 +6,11 @@ use Yii;
 use yii\web\Controller;
 use yii\filters\auth\HttpBearerAuth;
 use app\models\Cage;
+use app\models\Livestock;
+use app\models\LivestockImage;
+use app\models\Note;
+use app\models\NoteImage;
+use app\models\BodyCountScore;
 use app\models\User;
 use app\controllers\BaseController;
 use app\controllers\SiteController;
@@ -214,34 +219,58 @@ class CageController extends SiteController
      * @return mixed
      */
     public function actionDelete($id)
-    {
+{
+    $transaction = Yii::$app->db->beginTransaction();
+    try {
+        // Cari cage berdasarkan ID
         $cage = Cage::findOne($id);
-        if ($cage->delete()) {
-                Yii::$app->session->setFlash('success', 'Kandang berhasil dihapus.');
-                return $this->redirect(['cage/index']);
+
+        // Jika cage tidak ditemukan, tampilkan pesan error
+        if ($cage === null) {
+            Yii::$app->session->setFlash('error', 'Gagal menghapus data kandang. Data kandang tidak ditemukan.');
+            return $this->redirect(['index']);
+        }
+
+        // Dapatkan semua livestock yang terkait dengan cage
+        $livestockList = Livestock::find()->where(['cage_id' => $id])->all();
+
+        foreach ($livestockList as $livestock) {
+            // Hapus semua catatan yang terkait dengan livestock
+            $notes = Note::find()->where(['livestock_id' => $livestock->id])->all();
+            foreach ($notes as $note) {
+                // Hapus gambar yang terkait dengan catatan terlebih dahulu
+                NoteImage::deleteAll(['note_id' => $note->id]);
+
+                // Hapus catatan
+                $note->delete();
             }
 
-        // if (!ctype_digit($id)) {
-        //     Yii::$app->session->setFlash('error', 'ID tidak valid.');
-        //     return $this->redirect(['cage/index']);
-        // }
-    
-    
-        // if ($cage) {
-        //     if (!empty($cage->livestocks)) {
-        //         Yii::$app->session->setFlash('error', 'Kandang tidak dapat dihapus karena masih memiliki hewan ternak di dalamnya.');
-        //         return $this->redirect(['cage/index']);
-        //     }    
-        //     if ($cage->delete()) {
-        //         Yii::$app->session->setFlash('success', 'Kandang berhasil dihapus.');
-        //         return $this->redirect(['cage/index']);
-        //     }
-        // }
-    
-        // Yii::$app->response->statusCode = 404;
-        // return [
-        //     'message' => 'Gagal menghapus kandang, kandang tidak ditemukan.',
-        //     'error' => true,
-        // ];
+            // Hapus semua BCS yang terkait dengan livestock
+            BodyCountScore::deleteAll(['livestock_id' => $livestock->id]);
+
+            // Hapus gambar livestock
+            LivestockImage::deleteAll(['livestock_id' => $livestock->id]);
+
+            // Hapus livestock
+            $livestock->delete();
+        }
+
+        // Hapus cage
+        $cage->delete();
+
+        // Commit transaksi
+        $transaction->commit();
+
+        // Set flash message untuk sukses
+        Yii::$app->session->setFlash('success', 'Data kandang dan semua ternak di dalamnya berhasil dihapus.');
+    } catch (\Exception $e) {
+        // Rollback transaksi jika terjadi kesalahan
+        $transaction->rollBack();
+        Yii::$app->session->setFlash('error', 'Gagal menghapus data kandang. Alasan: ' . $e->getMessage());
     }
+
+    // Redirect ke halaman index setelah operasi selesai
+    return $this->redirect(['index']);
+}
+
 }
