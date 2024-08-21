@@ -15,6 +15,10 @@ use app\models\User;
 use app\controllers\BaseController;
 use app\controllers\SiteController;
 use yii\filters\VerbFilter;
+use yii\helpers\Url;
+use app\models\LoginForm;
+
+
 
 class CageController extends SiteController
 {
@@ -85,6 +89,13 @@ class CageController extends SiteController
      */
     public function actionIndex()
     {
+        if (Yii::$app->user->isGuest) {
+            $redirect = Url::to(['user/index']);
+            $model = new LoginForm();
+            return $this-> render($redirect , ['model'=> $model]);
+    
+         }
+        else{
         $model = new Cage();
         $userId = Yii::$app->user->identity->id;
         $error = [];
@@ -98,7 +109,7 @@ class CageController extends SiteController
             'model' => $model,
             'error' => $error,
         ]);
-    }
+    }}
 
     /**
      * Menampilkan data Cage berdasarkan ID.

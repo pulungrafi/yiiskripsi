@@ -20,6 +20,12 @@ $config = [
             'forceCopy' => !YII_ENV_PROD,
             'linkAssets' => true,
             'appendTimestamp' => true,
+            'bundles' => [
+            'yidas\yii\fontawesome\FontawesomeAsset' => [
+                'cdn' => true,
+                'cdnCSS' => ['https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css'],
+                ],
+            ],
         ],
         'view' => [
             'theme' => [
@@ -75,6 +81,7 @@ $config = [
             'rules' => [
             ],
         ],
+        
         
     ],
     'params' => [

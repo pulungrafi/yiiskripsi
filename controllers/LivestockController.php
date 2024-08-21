@@ -21,6 +21,9 @@ use yii\helpers\FileHelper;
 use Google\Cloud\Storage\StorageClient;
 use Google\Cloud\Storage\Acl;
 use yii\data\Pagination;
+use yii\helpers\Url;
+use app\models\LoginForm;
+
 
 
 class LivestockController extends SiteController
@@ -66,6 +69,13 @@ class LivestockController extends SiteController
 
     public function actionIndex()
 {
+    if (Yii::$app->user->isGuest) {
+        $redirect = Url::to(['user/index']);
+        $model = new LoginForm();
+        return $this-> render($redirect , ['model'=> $model]);
+
+     }
+    else{
     $model = new Livestock();
     $userId = Yii::$app->user->identity->id;
     $cages = Cage::find()
@@ -128,7 +138,7 @@ class LivestockController extends SiteController
         'model' => $model,
         'pagination' => $pagination,
     ]);
-}
+}}
 
     public function actionCreate(){
     $model = new Livestock();

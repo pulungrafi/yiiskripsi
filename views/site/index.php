@@ -2,13 +2,16 @@
 use yii\helpers\Html;
 use yii\helpers\HtmlPurifier;
 use yii\helpers\Url;
+use yidas\yii\fontawesome\FontawesomeAsset;
+
+
 
 /**
  * @var \yii\web\View $this
  * @var app\models\Livestock $livestock
  */
-
 $this->title = 'Dashboard';
+FontawesomeAsset::register($this);
 ?>
 <link rel="stylesheet" href="/assets/scss/iconly.scss"> 
 <div class="page-content"> 
@@ -21,7 +24,8 @@ $this->title = 'Dashboard';
                             <div class="row">
                                 <div class="col-md-4 col-lg-12 col-xl-12 col-xxl-5 d-flex justify-content-end ">
                                     <div class="stats-icon purple mb-2">
-                                        <i class="bi-house-fill "></i>
+                                        <i class="fa-solid fa-house-flag"></i>
+                                        <!-- <i class="bi-house-fill "></i> -->
                                     </div>
                                 </div>
                                 <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
@@ -39,7 +43,7 @@ $this->title = 'Dashboard';
                             <div class="row">
                                 <div class="col-md-4 col-lg-12 col-xl-12 col-xxl-5 d-flex justify-content-end ">
                                     <div class="stats-icon blue mb-2">
-                                        <i class="bi-heart-fill"></i>
+                                        <i class="fa-solid fa-cow"></i>
                                     </div>
                                 </div>
                                 <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">

@@ -20,7 +20,8 @@
         "yiisoft/yii2-swiftmailer": "~2.0.0 || ~2.1.0",
         "anovsiradj/yii2-theme-mazer": "^2.1",
         "yiisoft/yii2-httpclient": "~2.0.0",
-        "kartik-v/yii2-icons": "dev-master"
+        "kartik-v/yii2-icons": "dev-master",
+        "yidas/yii2-fontawesome": "^5.0"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",

@@ -11,6 +11,9 @@ use yii\web\UploadedFile;
 use yii\helpers\FileHelper;
 use app\models\BcsImage;
 use Google\Cloud\Storage\StorageClient;
+use yii\helpers\Url;
+use app\models\LoginForm;
+
 
 class BcsController extends SiteController
 {
@@ -56,6 +59,13 @@ class BcsController extends SiteController
     }
     public function actionIndex()
 {
+    if (Yii::$app->user->isGuest) {
+        $redirect = Url::to(['user/index']);
+        $model = new LoginForm();
+        return $this-> render($redirect , ['model'=> $model]);
+
+     }
+    else{
     $userId = Yii::$app->user->identity->id;
     $livestock = Livestock::find()
         ->where(['user_id' => $userId])
@@ -80,7 +90,7 @@ class BcsController extends SiteController
         'bcs' => $bcs,
         'model' => new BodyCountScore(),
     ]);
-}
+}}
 
 
 
