@@ -4,6 +4,7 @@ use app\models\Livestock;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\helpers\Url;
+use app\models\BodyCountScore;
 
 /**
  * @var yii\web\View $this 
@@ -67,60 +68,62 @@ use yii\helpers\Url;
                                         </thead>
                                         <tbody>
                                             <?php foreach ($bcs as $bcs): ?>
-                                            <tr>
-                                                <td class="text-bold-500 post"><?= $bcs->livestock->name ?></td>
-                                                <td><?= $bcs->body_weight ?></td>
-                                                <td><?= $bcs->chest_size ?></td>
-                                                <td><?= $bcs->hips ?></td>
-                                                <td><div class="comment-actions">
-                                                    <button class="btn icon icon-left btn-primary me-2 text-nowrap" data-bs-toggle="modal" data-bs-target="#modalView<?= $bcs->id ?>">
-                                                        <i class="bi bi-eye-fill"></i> Show
-                                                    </button>
-                                                    <?= Html::a(
-                                                        '<i class="bi bi-pencil-square"></i> Edit',
-                                                        ['bcs/update', 'id' => $bcs->id],
-                                                        [
-                                                            'class' => 'btn icon icon-left btn-warning me-2 text-nowrap',
-                                                            'data' => [
-                                                                'method' => 'put' , 'patch', // Use GET method to access the update page
-                                                            ],
-                                                        ]
-                                                    ) ?>                                                    
-                                                    <?= Html::a(
-                                                        '<i class="bi bi-x-circle"></i> Remove',
-                                                        ['bcs/delete', 'id' => $bcs->id],
-                                                        [
-                                                            'class' => 'btn icon icon-left btn-danger me-2 text-nowrap',
-                                                            'data' => [
-                                                                'confirm' => 'Apakah Anda yakin ingin menghapus kandang ini?',
-                                                                'method' => 'delete',
-                                                            ],
-                                                        ]
-                                                    ) ?>
-                                                </div></td>
-                                            </tr>
-                                            <div class="modal fade" id="modalView<?= $bcs->id ?>" tabindex="-1" aria-labelledby="modalViewLabel<?= $bcs->id ?>" aria-hidden="true">
-                                                <div class="modal-dialog">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title" id="modalViewLabel<?= $bcs->id ?>">Detail Kandang</h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                        <?php foreach ($bcs->attributes as $attributeLabels => $value): ?>
-                                                            <?php foreach ($bcs->attributeLabels() as $keyattr => $valueattr):?>
-                                                                <?php if ($keyattr === $attributeLabels ):?>
-                                                                    <strong><?= ucfirst(str_replace('_', ' ', $valueattr)) ?> : </strong> <?= $value ?><br>
-                                                                <?php endif; ?>
+                                                <tr>
+                                                    <td class="text-bold-500 post"><?= $bcs->livestock->name ?></td>
+                                                    <td><?= $bcs->body_weight ?></td>
+                                                    <td><?= $bcs->chest_size ?></td>
+                                                    <td><?= $bcs->hips ?></td>  
+                                                    <td><div class="comment-actions">
+                                                        <button class="btn icon icon-left btn-primary me-2 text-nowrap" data-bs-toggle="modal" data-bs-target="#modalView<?= $bcs->livestock_id ?>">
+                                                            <i class="bi bi-eye-fill"></i> Show
+                                                        </button>
+                                                        <?= Html::a(
+                                                            '<i class="bi bi-pencil-square"></i> Edit',
+                                                            ['bcs/update', 'id' => $bcs->id],
+                                                            [
+                                                                'class' => 'btn icon icon-left btn-warning me-2 text-nowrap',
+                                                                'data' => [
+                                                                    'method' => 'put',
+                                                                    ]
+                                                            ]
+                                                        ) ?>
+                                                        <?= Html::a(
+                                                            '<i class="bi bi-x-circle"></i> Remove',
+                                                            ['bcs/delete', 'id' => $bcs->id],
+                                                            [
+                                                                'class' => 'btn icon icon-left btn-danger me-2 text-nowrap',
+                                                                'data' => [
+                                                                    'confirm' => 'Apakah Anda yakin ingin menghapus kandang ini?',
+                                                                    'method' => 'delete',
+                                                                ],
+                                                            ]
+                                                        ) ?>
+                                                    </div></td>
+                                                </tr>
+
+                                                <div class="modal fade" id="modalView<?= $bcs->livestock_id ?>" tabindex="-1" aria-labelledby="modalViewLabel<?= $bcs->livestock_id ?>" aria-hidden="true">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="modalViewLabel<?= $bcs->livestock_id ?>">Riwayat Pencatatan BCS - <?= $bcs->livestock->name ?></h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <?php 
+                                                                $history = BodyCountScore::find()->where(['livestock_id' => $bcs->livestock_id])->orderBy(['created_at' => SORT_DESC])->all();
+                                                                foreach ($history as $record): ?>
+                                                                    <strong><?= $record->created_at ?>:</strong><br>
+                                                                    Berat: <?= $record->body_weight ?><br>
+                                                                    Lingkar Dada: <?= $record->chest_size ?><br>
+                                                                    Ukuran Pinggul: <?= $record->hips ?><br><br>
                                                                 <?php endforeach; ?>
-                                                        <?php endforeach; ?>
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
                                             <?php endforeach; ?>
                                         </tbody>
                                     <?php else: ?>

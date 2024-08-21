@@ -69,7 +69,10 @@ class BcsController extends SiteController
         ]);
     }
     $bcs = BodyCountScore::find()
-        ->joinWith('livestock')  // Join dengan tabel livestock
+        ->alias('bcs')
+        ->joinWith('livestock')
+        ->orderBy(['bcs.created_at' => SORT_DESC])
+        ->groupBy('bcs.livestock_id')
         ->where(['livestock.user_id' => $userId])
         ->all();
 

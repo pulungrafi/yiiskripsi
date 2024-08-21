@@ -86,6 +86,7 @@ class UserController extends SiteController
 
     public function actionIndex()
     {
+        $this->layout = 'auth';
         $model = new LoginForm();
         // echo Yii::$app->request->post();
         return $this->render('index', [

@@ -25,6 +25,11 @@ $this->registerJs("
         var value = $(this).val().replace(/[^0-9]/g, '');
         $(this).val(value + ' cm');
     });
+    // Add symbol 'cm' after the input in the feed_weight field
+    $('#livestock-form #hips').on('input', function() {
+        var value = $(this).val().replace(/[^0-9]/g, '');
+        $(this).val(value + ' cm');
+    });
 
     // Before the form is submitted, strip the symbols
     $('#livestock-form').on('submit', function() {
@@ -32,6 +37,8 @@ $this->registerJs("
         $('#livestock-form #chest_size').val(chestSizeValue);
         var bodyWeightValue = $('#livestock-form #body_weight').val().replace(' kg', '');
         $('#livestock-form #body_weight').val(bodyWeightValue);
+        var hipsValue = $('#livestock-form #hips').val().replace(' cm', '');
+        $('#livestock-form #hips').val(hipsValue);
     });
 ");
 ?>
@@ -271,8 +278,8 @@ if (Yii::$app->session->hasFlash('error')): ?>
                                                 ]) ?>
 
                                             <?= $form->field($model, 'hips')->textInput([
-                                                'placeholder' => 'Masukkan berat badan (kg)',
-                                                'id'=> 'body_weight',
+                                                'placeholder' => 'Masukkan ukuran pinggul (cm)',
+                                                'id'=> 'hips',
                                                 'type'=> 'text',
                                                 'maxlength'=> true,
                                                 ]) ?>
