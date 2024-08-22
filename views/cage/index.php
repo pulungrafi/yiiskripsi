@@ -66,7 +66,7 @@ use yii\helpers\StringHelper;
                                             <tr>
                                                 <td class="text-bold-500 post"><?= StringHelper::truncate($cage->name, 12, '...') ?></td>
                                                 <td><?= StringHelper::truncate($cage->location, 12, '...') ?></td>
-                                                <td><?= StringHelper::truncate($cage->capacity, 12, '...') ?></td>
+                                                <td><?= $cage->getLivestockCount() . '/' . $cage->capacity ?></td>
                                                 <td><div class="comment-actions">
                                                     <button class="btn icon icon-left btn-primary me-2 text-nowrap" data-bs-toggle="modal" data-bs-target="#modalView<?= $cage->id ?>">
                                                         <i class="bi bi-eye-fill"></i> Show

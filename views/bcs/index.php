@@ -13,6 +13,33 @@ use app\models\BodyCountScore;
  */
 
  $this->title = 'Tambah BCS';
+ $this->registerJs("
+    // Add symbol 'kg' after the input in the feed_weight field
+    $('#bcs-form #body_weight').on('input', function() {
+        var value = $(this).val().replace(/[^0-9]/g, '');
+        $(this).val(value + ' kg');
+    });
+    // Add symbol 'cm' after the input in the feed_weight field
+    $('#bcs-form #chest_size').on('input', function() {
+        var value = $(this).val().replace(/[^0-9]/g, '');
+        $(this).val(value + ' cm');
+    });
+    // Add symbol 'cm' after the input in the feed_weight field
+    $('#bcs-form #hips').on('input', function() {
+        var value = $(this).val().replace(/[^0-9]/g, '');
+        $(this).val(value + ' cm');
+    });
+
+    // Before the form is submitted, strip the symbols
+    $('#bcs-form').on('submit', function() {
+        var chestSizeValue = $('#bcs-form #chest_size').val().replace(' cm', '');
+        $('#bcs-form #chest_size').val(chestSizeValue);
+        var bodyWeightValue = $('#bcs-form #body_weight').val().replace(' kg', '');
+        $('#bcs-form #body_weight').val(bodyWeightValue);
+        var hipsValue = $('#bcs-form #hips').val().replace(' cm', '');
+        $('#bcs-form #hips').val(hipsValue);
+    });
+");
  ?>
 
 <div class="page-content"> 
@@ -33,9 +60,26 @@ use app\models\BodyCountScore;
                                         \yii\helpers\ArrayHelper::map(Livestock::find()->where(['user_id' => Yii::$app->user->id])->all(), 'id', 'name'),
                                         ['prompt' => 'Pilih Sapi']
                                     )->label('Nama Ternak') ?>
-                                    <?= $form->field($model, 'body_weight')->input('number', ['placeholder' => 'Masukkan berat badan (kg)']) ?>
-                                    <?= $form->field($model, 'chest_size')->input('number', ['placeholder' => 'Masukkan ukuran dada (cm)']) ?>
-                                    <?= $form->field($model, 'hips')->input('number', ['placeholder' => 'Masukkan ukuran pinggul (cm)']) ?>
+                                    <?= $form->field($model, 'chest_size')->textInput([
+                                                'id' => 'chest_size',
+                                                'type' => 'text',
+                                                'maxlength'=> true,
+                                                'placeholder' => 'Masukkan ukuran dada (cm)'
+                                                ]) ?>
+
+                                            <?= $form->field($model, 'body_weight')->textInput([
+                                                'placeholder' => 'Masukkan berat badan (kg)',
+                                                'id'=> 'body_weight',
+                                                'type'=> 'text',
+                                                'maxlength'=> true,
+                                                ]) ?>
+
+                                            <?= $form->field($model, 'hips')->textInput([
+                                                'placeholder' => 'Masukkan ukuran pinggul (cm)',
+                                                'id'=> 'hips',
+                                                'type'=> 'text',
+                                                'maxlength'=> true,
+                                                ]) ?>
                                 </div>
                                 <div class="form-actions d-flex justify-content-end mt-3">
                                             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
@@ -70,9 +114,9 @@ use app\models\BodyCountScore;
                                             <?php foreach ($bcs as $bcs): ?>
                                                 <tr>
                                                     <td class="text-bold-500 post"><?= $bcs->livestock->name ?></td>
-                                                    <td><?= $bcs->body_weight ?></td>
-                                                    <td><?= $bcs->chest_size ?></td>
-                                                    <td><?= $bcs->hips ?></td>  
+                                                    <td><?= $bcs->body_weight ?> kg</td>
+                                                    <td><?= $bcs->chest_size ?> cm</td>
+                                                    <td><?= $bcs->hips ?> cm</td>  
                                                     <td><div class="comment-actions">
                                                         <button class="btn icon icon-left btn-primary me-2 text-nowrap" data-bs-toggle="modal" data-bs-target="#modalView<?= $bcs->livestock_id ?>">
                                                             <i class="bi bi-eye-fill"></i> Show
@@ -113,9 +157,9 @@ use app\models\BodyCountScore;
                                                                 $history = BodyCountScore::find()->where(['livestock_id' => $bcs->livestock_id])->orderBy(['created_at' => SORT_DESC])->all();
                                                                 foreach ($history as $record): ?>
                                                                     <strong><?= $record->created_at ?>:</strong><br>
-                                                                    Berat: <?= $record->body_weight ?><br>
-                                                                    Lingkar Dada: <?= $record->chest_size ?><br>
-                                                                    Ukuran Pinggul: <?= $record->hips ?><br><br>
+                                                                    Berat: <?= $record->body_weight ?> kg<br>
+                                                                    Lingkar Dada: <?= $record->chest_size ?> cm<br>
+                                                                    Ukuran Pinggul: <?= $record->hips ?> cm<br><br>
                                                                 <?php endforeach; ?>
                                                             </div>
                                                             <div class="modal-footer">

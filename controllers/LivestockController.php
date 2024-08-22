@@ -23,6 +23,8 @@ use Google\Cloud\Storage\Acl;
 use yii\data\Pagination;
 use yii\helpers\Url;
 use app\models\LoginForm;
+use yii\data\ActiveDataProvider;
+
 
 
 
@@ -61,6 +63,7 @@ class LivestockController extends SiteController
                 'search' => ['GET'],
                 'get-livestocks' => ['GET'],
                 'upload-image' => ['POST'],
+                'bcs-data' => ['GET'],
             ],
         ];
 
@@ -180,22 +183,33 @@ class LivestockController extends SiteController
             ]);
         }
     }}
+  
     public function actionBcsData($id)
 {
-    $bcsData = BodyCountScore::find()->where(['livestock_id' => $id])->all();
+    $query = BodyCountScore::find()->where(['livestock_id' => $id]);
+    $model = $this->findLivestockModel($id);
 
-    $data = [];
-    foreach ($bcsData as $bcs) {
-        $data[] = [
-            'date' => $bcs->date, // Ganti dengan nama atribut tanggal jika berbeda
-            'chest_size' => $bcs->chest_size,
-            'hips' => $bcs->hips,
-            'body_weight' => $bcs->body_weight,
-        ];
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'pagination' => [
+                'pageSize' => 10, // Set page size as required
+            ],
+        ]);
+
+        return $this->render('bcs', [
+            'dataProvider' => $dataProvider,
+            'model' => $model,
+        ]);
+}
+protected function findLivestockModel($id)
+    {
+        if (($model = Livestock::findOne($id)) !== null) {
+            return $model;
+        }
+
+        throw new NotFoundHttpException('The requested livestock does not exist.');
     }
 
-    return $this->asJson($data);
-}
     
     protected function uploadImages($model, $imageFiles)
     {
@@ -243,24 +257,58 @@ class LivestockController extends SiteController
      * @throws ServerErrorHttpException jika data Livestock tidak dapat diupdate
      */
     public function actionUpdate($id)
-    {
-        $model = Livestock::findOne($id);
+{
+    $model = $this->findModel($id);
+
+    if ($model->load(Yii::$app->request->post())) {
+
+        $model->livestock_image = UploadedFile::getInstance($model, 'livestock_image');
         
-        if ($model->load(Yii::$app->request->post())) {
-            $model->livestock_image = UploadedFile::getInstance($model, 'livestock_image');
-            
-            if ($model->livestock_image && $model->uploadImage()) {
-                if ($model->save(false)) {
-                    Yii::$app->session->setFlash('success', 'Livestock updated successfully.');
+        if ($model->save()) {
+            if ($model->livestock_image) {
+                if ($model->uploadImage()) {
                     return $this->redirect(['index']);
+                } else {
+                    return $this->redirect(['update','id'=> $model->id]);
+                    // Kesalahan dalam mengunggah gambar
                 }
             }
-        }
 
-        return $this->render('update', [
-            'model' => $model,
-        ]);
+            return $this->redirect(['index']);
+        }
     }
+
+    return $this->render('update', [
+        'model' => $model,
+    ]);
+}
+    private function uploadImage()
+{
+    if ($this->validate()) {
+        // Nama file unik untuk menghindari duplikasi
+        $fileName = $this->id . '_' . uniqid() . '_' . $this->livestock_image->baseName . '.' . $this->livestock_image->extension;
+        
+        // Tentukan direktori penyimpanan
+        $uploadDir = Yii::getAlias('@webroot/uploads');
+        
+        // Pastikan direktori ada, jika tidak maka buat direktori tersebut
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+        
+        // Gabungkan direktori dan nama file untuk membuat file path absolut
+        $filePath = $uploadDir . '/' . $fileName;
+
+        // Simpan file dan periksa apakah berhasil
+        if ($this->livestock_image->saveAs($filePath)) {
+            // Simpan konten gambar ke atribut 'image' di database
+            $this->image = file_get_contents($filePath);
+            return true;
+        }
+    }
+    return false;
+}
+
 
 
 
@@ -410,88 +458,88 @@ class LivestockController extends SiteController
      * @return mixed
      * @throws ServerErrorHttpException jika gambar tidak dapat disimpan
      */
-    public function actionUploadImage($id)
-    {
-        // Find the Livestock model based on ID
-        $model = $this->findModel($id);
+    // public function actionUploadImage($id)
+    // {
+    //     // Find the Livestock model based on ID
+    //     $model = $this->findModel($id);
 
-        // Get the image from the request
-        $imageFiles = UploadedFile::getInstancesByName('livestock_image');
+    //     // Get the image from the request
+    //     $imageFiles = UploadedFile::getInstancesByName('livestock_image');
 
-        if (!empty($imageFiles)) {
-            // Get the user_id of the currently logged in user
-            $userId = Yii::$app->user->identity->id;
+    //     if (!empty($imageFiles)) {
+    //         // Get the user_id of the currently logged in user
+    //         $userId = Yii::$app->user->identity->id;
 
-            // Create a directory path based on user_id and Livestock id
-            $uploadPath = 'livestock/' . $userId . '/' . $model->id . '/';
+    //         // Create a directory path based on user_id and Livestock id
+    //         $uploadPath = 'livestock/' . $userId . '/' . $model->id . '/';
 
-            $uploadedImages = [];
+    //         $uploadedImages = [];
 
-            // Initialize the Google Cloud Storage client
-            $storage = new StorageClient([
-                'keyFilePath' => Yii::getAlias('@app/config/sa.json')
-            ]);
-            $bucket = $storage->bucket('digiternak1');
+    //         // Initialize the Google Cloud Storage client
+    //         $storage = new StorageClient([
+    //             'keyFilePath' => Yii::getAlias('@app/config/sa.json')
+    //         ]);
+    //         $bucket = $storage->bucket('digiternak1');
 
-            // Iterate through each uploaded file
-            foreach ($imageFiles as $index => $imageFile) {
-                // Check if the temporary file path is set
-                if (empty($imageFile->tempName)) {
-                    Yii::$app->response->statusCode = 400;
-                    return [
-                        'message' => 'Gagal mengunggah gambar. Silakan coba lagi.',
-                        'error' => true,
-                    ];
-                }
+    //         // Iterate through each uploaded file
+    //         foreach ($imageFiles as $index => $imageFile) {
+    //             // Check if the temporary file path is set
+    //             if (empty($imageFile->tempName)) {
+    //                 Yii::$app->response->statusCode = 400;
+    //                 return [
+    //                     'message' => 'Gagal mengunggah gambar. Silakan coba lagi.',
+    //                     'error' => true,
+    //                 ];
+    //             }
 
-                // Generate a unique file name
-                $imageName = Yii::$app->security->generateRandomString(12) . $index . '.' . $imageFile->getExtension();
+    //             // Generate a unique file name
+    //             $imageName = Yii::$app->security->generateRandomString(12) . $index . '.' . $imageFile->getExtension();
             
-                // Save the file to the directory
-                $object = $bucket->upload(
-                    file_get_contents($imageFile->tempName),
-                    ['name' => $uploadPath . $imageName]
-                );
+    //             // Save the file to the directory
+    //             $object = $bucket->upload(
+    //                 file_get_contents($imageFile->tempName),
+    //                 ['name' => $uploadPath . $imageName]
+    //             );
 
-                // Make the object publicly accessible
-                $object->update(['acl' => []], ['predefinedAcl' => 'publicRead']);
+    //             // Make the object publicly accessible
+    //             $object->update(['acl' => []], ['predefinedAcl' => 'publicRead']);
             
-                // Get the public URL of the object
-                $publicUrl = sprintf('https://storage.googleapis.com/%s/%s', $bucket->name(), $uploadPath . $imageName);
+    //             // Get the public URL of the object
+    //             $publicUrl = sprintf('https://storage.googleapis.com/%s/%s', $bucket->name(), $uploadPath . $imageName);
 
-                // Save the image information to the livestock_images table
-                $livestockImage = new LivestockImage();
-                $livestockImage->livestock_id = $model->id;
-                $livestockImage->image_path = $uploadPath . $imageName;
-                if (!$livestockImage->save()) {
-                    Yii::$app->response->statusCode = 400;
-                    return [
-                        'message' => 'Gagal menyimpan data gambar ke database.',
-                        'error' => true,
-                    ];
-                }
+    //             // Save the image information to the livestock_images table
+    //             $livestockImage = new LivestockImage();
+    //             $livestockImage->livestock_id = $model->id;
+    //             $livestockImage->image_path = $uploadPath . $imageName;
+    //             if (!$livestockImage->save()) {
+    //                 Yii::$app->response->statusCode = 400;
+    //                 return [
+    //                     'message' => 'Gagal menyimpan data gambar ke database.',
+    //                     'error' => true,
+    //                 ];
+    //             }
             
-                // Save the public URL to the array
-                $uploadedImages[] = $publicUrl;
-            }
+    //             // Save the public URL to the array
+    //             $uploadedImages[] = $publicUrl;
+    //         }
 
-            // If the model saving is successful
-            Yii::$app->response->statusCode = 201;
-            return [
-                'message' => 'Gambar berhasil diunggah.',
-                'error' => false,
-                'data' => [
-                    'livestock_images' => $uploadedImages,
-                ],
-            ];
-        } else {
-            Yii::$app->response->statusCode = 400;
-            return [
-                'message' => 'Tidak ada gambar yang diunggah.',
-                'error' => true,
-            ];
-        }
-    }
+    //         // If the model saving is successful
+    //         Yii::$app->response->statusCode = 201;
+    //         return [
+    //             'message' => 'Gambar berhasil diunggah.',
+    //             'error' => false,
+    //             'data' => [
+    //                 'livestock_images' => $uploadedImages,
+    //             ],
+    //         ];
+    //     } else {
+    //         Yii::$app->response->statusCode = 400;
+    //         return [
+    //             'message' => 'Tidak ada gambar yang diunggah.',
+    //             'error' => true,
+    //         ];
+    //     }
+    // }
 
     /**
      * Menemukan model Livestock berdasarkan ID.

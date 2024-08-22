@@ -331,15 +331,16 @@ public function uploadImage()
 {
     if ($this->validate()) {
         $fileName = $this->id . '_' . $this->livestock_image->baseName . '.' . $this->livestock_image->extension;
-        $filePath = 'uploads/' . $fileName;
+        $filePath = Yii::getAlias('@webroot') . '/uploads/' . $fileName;
 
         if ($this->livestock_image->saveAs($filePath)) {
-            $this->image = file_get_contents($filePath); // Save the image content to the 'image' attribute
+            $this->image = file_get_contents($filePath); // Menyimpan konten gambar ke atribut 'image'
             return true;
         }
     }
     return false;
 }
+
 
 
     const SCENARIO_UPDATE = 'update';

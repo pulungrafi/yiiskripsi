@@ -82,7 +82,6 @@ class BcsController extends SiteController
         ->alias('bcs')
         ->joinWith('livestock')
         ->orderBy(['bcs.created_at' => SORT_DESC])
-        ->groupBy('bcs.livestock_id')
         ->where(['livestock.user_id' => $userId])
         ->all();
 

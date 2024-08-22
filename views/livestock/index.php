@@ -13,7 +13,7 @@ use yii\widgets\LinkPager;
  * @var app\models\LivestockImage $image
  */
 
-$this->title = 'Daftar Sapi';
+$this->title = 'Tambah Sapi';
 $this->registerJs("
     // Add symbol 'kg' after the input in the feed_weight field
     $('#livestock-form #body_weight').on('input', function() {
@@ -115,9 +115,10 @@ if (Yii::$app->session->hasFlash('error')): ?>
                                                             ],
                                                         ]
                                                     ) ?>
-                                                     <button class="btn icon icon-left btn-info me-2" onclick="showBcsChart(<?= $livestock->id ?>)">                                                       
-                                                         <i class="bi bi-file-bar-graph"></i>Grafik BCS
-                                                        </button>
+                                                     <?= Html::a('Lihat Data BCS', ['livestock/bcs-data', 'id' => $livestock->id], [
+                                                        'class' => 'btn btn-info',
+                                                    ]) ?>
+
 
                                                 </div></td>
                                 </tr>
@@ -325,74 +326,6 @@ if (Yii::$app->session->hasFlash('error')): ?>
 <!-- Include Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- Add a modal or container for the chart -->
-<div id="bcsChartContainer" style="display:none;">
-    <canvas id="bcsChart"></canvas>
-</div>
 
-<script>
-function showBcsChart(livestockId) {
-    fetch(`index.php?r=controller/bcs-data&id=${livestockId}`)
-        .then(response => response.json())
-        .then(data => {
-            // Extract data for the chart
-            const dates = data.map(item => item.date);
-            const chestSizes = data.map(item => item.chest_size);
-            const hips = data.map(item => item.hips);
-            const bodyWeights = data.map(item => item.body_weight);
 
-            // Create the chart
-            const ctx = document.getElementById('bcsChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: dates,
-                    datasets: [
-                        {
-                            label: 'Chest Size',
-                            data: chestSizes,
-                            borderColor: 'blue',
-                            fill: false
-                        },
-                        {
-                            label: 'Hips',
-                            data: hips,
-                            borderColor: 'red',
-                            fill: false
-                        },
-                        {
-                            label: 'Body Weight',
-                            data: bodyWeights,
-                            borderColor: 'green',
-                            fill: false
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        x: {
-                            type: 'time',
-                            time: {
-                                unit: 'day'
-                            },
-                            title: {
-                                display: true,
-                                text: 'Date'
-                            }
-                        },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Values'
-                            }
-                        }
-                    }
-                }
-            });
 
-            // Show the chart container
-            document.getElementById('bcsChartContainer').style.display = 'block';
-        });
-}
-</script>
