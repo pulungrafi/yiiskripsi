@@ -75,6 +75,7 @@ if (Yii::$app->session->hasFlash('error')): ?>
                             <?php if (!empty($livestock)): ?> 
                             <thead>
                                 <tr>
+                                    <th></th>
                                     <th>VID</th>
                                     <th>Nama</th>
                                     <th>Kandang</th>
@@ -83,8 +84,10 @@ if (Yii::$app->session->hasFlash('error')): ?>
                                 </tr>
                             </thead>
                             <tbody>
+                            <?php $counter = 1; ?>
                             <?php foreach ($livestock as $livestock): ?>
                                 <tr>
+                                    <td class="text-bold-500"><?= $counter++ ?></td> <!-- Menambahkan kolom nomor -->
                                     <td class="text-bold-500"><?= $livestock->vid?></td>
                                     <td class="text-bold-500"><?= $livestock->name ?></td>
                                     <td class="text-bold-500"><?= $livestock->cage->name ?></td>
@@ -232,7 +235,7 @@ if (Yii::$app->session->hasFlash('error')): ?>
                                                 'Gembala' => 'Gembala',
                                                 'Campuran' => 'Campuran',
                                             ], ['prompt' => 'Pilih jenis pemeliharaan']) ?>
-                                            <?= $form->field($model, 'livestock_image[]')->fileInput(['multiple' => true, 'class' => 'form-control']) ?>
+                                            <!-- <?= $form->field($model, 'livestock_image[]')->fileInput(['multiple' => true, 'class' => 'form-control']) ?> -->
                                             </div>
                                             <div class = "col">
                                                 <?= $form->field($model, 'vid')->textInput(['maxlength' => true, 'placeholder' => 'Masukkan kode VID']) ?>

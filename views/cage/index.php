@@ -56,14 +56,17 @@ use yii\helpers\StringHelper;
                         <?php if (!empty($cage)): ?>
                                         <thead>
                                             <tr>
+                                                <th></th>
                                                 <th>Nama Kandang</th>
                                                 <th>Lokasi</th>
                                                 <th>Kapasitas</th>
                                             </tr>
                                         </thead>
                                         <tbody>
+                                            <?php $counter = 1;?>
                                             <?php foreach ($cage as $cage): ?>
                                             <tr>
+                                                <td class="text-bold-500"><?= $counter++ ?></td> <!-- Menambahkan kolom nomor -->
                                                 <td class="text-bold-500 post"><?= StringHelper::truncate($cage->name, 12, '...') ?></td>
                                                 <td><?= StringHelper::truncate($cage->location, 12, '...') ?></td>
                                                 <td><?= $cage->getLivestockCount() . '/' . $cage->capacity ?></td>

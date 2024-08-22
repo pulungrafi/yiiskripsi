@@ -53,7 +53,7 @@ $this->title = 'Update Kandang: ' . $model->name;
                                                 'Gembala' => 'Gembala',
                                                 'Campuran' => 'Campuran',
                                             ], ['prompt' => 'Pilih jenis pemeliharaan']) ?>
-                                            <?= $form->field($model, 'livestock_image[]')->fileInput(['class' => 'form-control']) ?>
+                                            <!-- <?= $form->field($model, 'livestock_image[]')->fileInput(['class' => 'form-control']) ?> -->
                                             </div>
                                             <div class = "col">
                                                 <?= $form->field($model, 'vid')->textInput(['maxlength' => true, 'placeholder' => 'Masukkan kode VID']) ?>

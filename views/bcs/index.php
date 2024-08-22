@@ -104,6 +104,7 @@ use app\models\BodyCountScore;
                         <?php if (!empty($bcs)): ?>
                                         <thead>
                                             <tr>
+                                                <th></th>
                                                 <th>Nama Sapi</th>
                                                 <th>Berat Sapi</th>
                                                 <th>Lingkar Dada</th>
@@ -111,8 +112,10 @@ use app\models\BodyCountScore;
                                             </tr>
                                         </thead>
                                         <tbody>
+                                            <?php $counter=1; ?>
                                             <?php foreach ($bcs as $bcs): ?>
                                                 <tr>
+                                                    <td class="text-bold-500"><?= $counter++ ?></td> <!-- Menambahkan kolom nomor -->
                                                     <td class="text-bold-500 post"><?= $bcs->livestock->name ?></td>
                                                     <td><?= $bcs->body_weight ?> kg</td>
                                                     <td><?= $bcs->chest_size ?> cm</td>
@@ -153,8 +156,7 @@ use app\models\BodyCountScore;
                                                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                             </div>
                                                             <div class="modal-body">
-                                                                <?php 
-                                                                $history = BodyCountScore::find()->where(['livestock_id' => $bcs->livestock_id])->orderBy(['created_at' => SORT_DESC])->all();
+                                                                <?php                                                                 $history = BodyCountScore::find()->where(['livestock_id' => $bcs->livestock_id])->orderBy(['created_at' => SORT_DESC])->all();
                                                                 foreach ($history as $record): ?>
                                                                     <strong><?= $record->created_at ?>:</strong><br>
                                                                     Berat: <?= $record->body_weight ?> kg<br>

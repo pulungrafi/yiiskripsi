@@ -67,14 +67,17 @@ FontawesomeAsset::register($this);
                                     <?php if (!empty($cages)): ?>
                                         <thead>
                                             <tr>
+                                                <th></th>
                                                 <th>Nama Kandang</th>
                                                 <th>Lokasi</th>
                                                 <th>Kapasitas</th>
                                             </tr>
                                         </thead>
                                         <tbody>
+                                            <?php $counter = 1; ?>
                                             <?php foreach ($cages as $cage): ?>
                                             <tr>
+                                                <td class="text-bold-500"><?= $counter++ ?></td> <!-- Menambahkan kolom nomor -->
                                                 <td class="text-bold-500 post"><?= $cage->name ?></td>
                                                 <td><?= $cage->location ?></td>
                                                 <td><?= $cage->getLivestockCount() . '/' . $cage->capacity ?></td>
@@ -105,6 +108,7 @@ FontawesomeAsset::register($this);
                                 <?php if (!empty($livestocks)): ?> 
                             <thead>
                                 <tr>
+                                    <th></th>
                                     <th>VID</th>
                                     <th>Nama</th>
                                     <th>Kandang</th>
@@ -113,8 +117,10 @@ FontawesomeAsset::register($this);
                                 </tr>
                             </thead>
                             <tbody>
+                            <?php $counter = 1; ?>
                             <?php foreach ($livestocks as $livestock): ?>
                                 <tr>
+                                    <td class="text-bold-500"><?= $counter++ ?></td> <!-- Menambahkan kolom nomor -->
                                     <td class="text-bold-500"><?= $livestock->vid?></td>
                                     <td class="text-bold-500"><?= $livestock->name ?></td>
                                     <td class="text-bold-500"><?= $livestock->cage->name ?></td>

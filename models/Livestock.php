@@ -90,7 +90,7 @@ class Livestock extends ActiveRecord
             'body_weight' => 'Berat Sapi Pertama',
             'hips' => 'Ukuran Pinggul Pertama',
             'health' => 'Kesehatan Ternak',
-            'livestock_image' => 'Foto Ternak',
+            // 'livestock_image' => 'Foto Ternak',
             'created_at'=> 'Dibuat Pada',
             'updated_at'=> 'Diperbarui Pada',
         ];
